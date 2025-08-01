@@ -1,0 +1,11 @@
+[project]
+name = "tg-media-pusher"
+version = "0.1.0"
+description = "A project for pushing media to Telegram"
+authors = [{ name="Your Name", email="your@email.com" }]
+dependencies = [
+    "flask",
+]
+
+[tool.setuptools]
+packages = ["tg_media_pusher"]

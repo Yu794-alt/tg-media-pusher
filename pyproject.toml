@@ -8,4 +8,4 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["tg_media_pusher"]
+packages = ["src"]

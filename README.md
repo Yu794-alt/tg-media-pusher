@@ -26,6 +26,28 @@ A tool for detecting video content in folders and tagging videos with AI assista
 
 <!-- ...add usage instructions here if available... -->
 
+## How to start
+
+1. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
+
+2. Run the Flask app:
+   ```
+   python -m src
+   ```
+
+   Or, if you want auto-reload during development:
+   ```
+   export FLASK_APP=src:app
+   export FLASK_ENV=development
+   flask run
+   ```
+   (On Windows, use `set` instead of `export`.)
+
+The API will be available at http://127.0.0.1:5000/
+
 ## Contributing
 
 <!-- ...add contributing guidelines here if desired... -->

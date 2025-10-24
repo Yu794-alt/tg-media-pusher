@@ -7,3 +7,4 @@ def get_user(user_id: int):
 
 def get_welcome_message():
     return {"message": "Welcome from the user service!"}
+

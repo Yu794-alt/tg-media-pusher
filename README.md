@@ -35,7 +35,7 @@ A tool for detecting video content in folders and tagging videos with AI assista
 
 2. Run the Flask app:
    ```
-   python -m src
+   python .\src\tgmp\main.py
    ```
 
    Or, if you want auto-reload during development:

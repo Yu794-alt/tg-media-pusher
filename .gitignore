@@ -1,0 +1,55 @@
+# === Python compiled files ===
+__pycache__/
+*.py[cod]
+*$py.class
+
+# === Virtual environments ===
+.env
+.venv
+env/
+venv/
+
+# === Distribution / packaging ===
+build/
+dist/
+*.egg-info/
+.eggs/
+MANIFEST
+
+# === Logs and temporary files ===
+*.log
+*.tmp
+*.temp
+*.bak
+
+# === IDE / Editors ===
+# VSCode
+.vscode/
+# PyCharm / IntelliJ
+.idea/
+# Sublime
+*.sublime-workspace
+*.sublime-project
+
+# === OS generated files ===
+.DS_Store
+Thumbs.db
+
+# === Testing / coverage ===
+htmlcov/
+.tox/
+.nox/
+.coverage
+coverage.xml
+*.cover
+.cache
+.pytest_cache/
+nosetests.xml
+test-results.xml
+
+# === Jupyter Notebooks ===
+.ipynb_checkpoints
+
+# === Custom local data ===
+*.session
+local_settings.py

@@ -1,9 +1,19 @@
 
-from entities.media_entity import Media
+# import asyncio
+# from entities.media_entity import Media
+# from services.messager_service import MessagerService
+# from services.messager_telegram_service import TelegramMessager
+# from services.telegram.impl.telegram_conncet_chanel import TelegramConnectChannel
+
+# class MediaService:
+#     def __init__(self):
+#         self.messager = TelegramMessager(TelegramConnectChannel())
+#         self.client = None
+#         self.entity = None
+
+#     async def init_connection(self):
+#         """Ensure we have a client and entity before sending anything."""
+#         if not self.client or not self.entity:
+#             self.client, self.entity = await self.messager.connect()
 
 
-def get_video():
-    folder = Media("D:\\tv", extensions=[".mp4", ".webm", ".avi"])
-    videos = folder.get_media_files()
-    print(videos)
-    return {"message": "Video folder retrieved successfully", "folder_path": str(folder.folder_path)}

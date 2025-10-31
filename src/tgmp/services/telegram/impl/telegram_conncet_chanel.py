@@ -1,8 +1,6 @@
-import os
-from services.telegram.telegram_connect import TelegramConnect
 from telethon import TelegramClient
-# from config import API_ID, API_HASH, CHANNEL_LINK
 import config
+from services.telegram.telegram_connect import TelegramConnect
 
 class  TelegramConnectChannel(TelegramConnect):
         

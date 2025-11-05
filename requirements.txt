@@ -2,3 +2,4 @@ flask
 python-dotenv
 telethon
 google-genai
+livereload

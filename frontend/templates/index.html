@@ -6,22 +6,9 @@
     <title>{% block title %}My Flask App{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
 </head>
-<body class="bg-gray-100 ">
-<div class="mx-auto">
-    <nav class="max-h-fit flex justify-between bg-gray-700 px-8 py-3 items-center">
-        <div>
-            'logo'
-        </div>
-        <div>
-            <ul class="items-center flex gap-1">
-                <li class="btn-primary">btn</li>
-                <li class="btn-primary">btn</li>
-                <li class="btn-primary">btn</li>
-            </ul>
-        </div>
-    </nav>
-</div>
-
+<body class="font-roboto-condensed">
+{% include 'layout/header.html' %}
 {% block content %}{% endblock %}
+{% include 'layout/footer.html' %}
 </body>
 </html>

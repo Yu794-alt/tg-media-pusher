@@ -15,9 +15,10 @@ app = Flask(__name__,
             template_folder=TEMPLATES_DIR,
             static_folder=STATIC_DIR)
 
-print(STATIC_DIR)
-print(TEMPLATES_DIR)
-print(base_dir)
+app.config['DEBUG'] = True
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
 
 app.register_blueprint(main_bp)
 

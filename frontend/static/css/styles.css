@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
+
+:root {
+    --primary: #203456;
+    --secondary: #2D86C7;
+    --tertiary: #B6B8BE;
+    --background-primary: #E4EEF7;
+    --background-secondary: #EFF7F9;
+}
+
+@theme {
+    --color-background-primary: var(--background-primary);
+    --color-background-secondary: var(--background-secondary);
+    --color-primary: var(--primary);
+    --color-secondary: var(--secondary);
+    --color-tertiary: var(--tertiary);
+    --font-roboto-condensed: "Roboto Condensed", sans-serif;
+}

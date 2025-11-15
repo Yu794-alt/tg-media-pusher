@@ -10,7 +10,7 @@
 }
 
 .card {
-    @apply bg-background-secondary py-3 px-3 rounded w-3xs h-48 flex flex-col items-center gap-3 pt-12 hover:-translate-y-2 transition-transform duration-500 ease-in-out ;
+    @apply bg-background-secondary py-3 px-3 rounded w-3xs h-48 flex flex-col items-center gap-3 pt-12 [transition:transform_0.3s_ease,box-shadow_0.3s_ease] [transform:translateY(0)] hover:[transform:translateY(-8px)];
 }
 
 .container {

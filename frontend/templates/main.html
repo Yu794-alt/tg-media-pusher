@@ -18,9 +18,7 @@
                 </button>
 
             </div>
-            <div>
-                <img id="plane" class="" src="../static/images/photo (2).png" alt="flying paper plane"/>
-            </div>
+            <object data="../static/images/photo-2(1).svg" type="image/svg+xml" class="w-1/2 h-4/5"></object>
         </div>
     </section>
     <main class="bg-white py-8">
@@ -102,16 +100,15 @@
         // handle card animation
         const cards = document.querySelectorAll('.card');
 
-
         Array.from(cards).forEach(card => {
             let isHovered = false;
-
-            const rect = card.getBoundingClientRect();
 
             card.addEventListener('mousemove', (e) => {
                 if (!isHovered) {
                     return
                 }
+                const rect = card.getBoundingClientRect();
+
                 const mouseX = e.clientX - rect.left;
                 const mouseY = e.clientY - rect.top;
 

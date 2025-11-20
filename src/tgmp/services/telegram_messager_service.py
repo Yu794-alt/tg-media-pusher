@@ -1,12 +1,14 @@
 import asyncio
+import os
 import threading
 
-from api.gemini import generate_content
+from api.gemini import generate_content, upload_file
 from entities.media_entity import Media
 from telethon import events
 
 from services.messager_service import MessagerService
 from services.telegram.telegram_connect import TelegramConnect
+from services.cv_processing_service import CVProcessingService
 
 class TelegramMessagerService(MessagerService):
 
@@ -16,11 +18,18 @@ class TelegramMessagerService(MessagerService):
         self.entity = None
 
     async def setup_handlers(self):
-        @self.client.on(events.NewMessage(incoming=True, from_users='Arkadiy', func=lambda e: e.media is None))
+        @self.client.on(events.NewMessage(incoming=True, from_users='Arkadiy', func=lambda e: e.media is not None))
         async def handle_new_message(event):
-            answer = generate_content(event.message.text)
-            if event.is_private and not event.out:
-                await event.reply(answer)
+            cv = event.message.document
+            dosc = await self.client.download_media(cv, file="./")
+            # file = os.path.basename()
+            file_gemini_reference_to_file  =  upload_file(dosc)
+            tags_from_bd = "javascript, react, laravel"
+            result = CVProcessingService.get_ai_result(tags_from_bd, file_gemini_reference_to_file)
+            print(result)
+            # answer = generate_content(event.message.text)
+            # if event.is_private and not event.out:
+            #     await event.reply(answer)
 
             print(f"New message received: {event.message.text}")
 
@@ -31,15 +40,15 @@ class TelegramMessagerService(MessagerService):
 
             print(f"New message received: {event.message.text}")
 
-        @self.client.on(events.NewMessage(incoming=True, func=lambda e: e.media is not None))
-        async def handle_incoming_message(event):
-            answer = generate_content(event.message.text)
-            # print(f"Новое сообщение в чате '{chat.title}' от {sender.first_name}: {event.message.text}")
-            # answer generate_content(event.message.text)
-            if event.is_private:
-                await event.reply(answer)
-
-            print(f"New message received: {event.message.text}")
+        # @self.client.on(events.NewMessage(incoming=True, func=lambda e: e.media is not None))
+        # async def handle_incoming_message(event):
+        #     # answer = generate_content(event.message.text)
+        #     # print(f"Новое сообщение в чате '{chat.title}' от {sender.first_name}: {event.message.text}")
+        #     # answer generate_content(event.message.text)
+        #     if event.is_private:
+        #         await event.reply(answer)
+        #
+        #     print(f"New message received: {event.message.text}")
 
     # async def setup_handlers(self):
     #     @self.client.on(events.NewMessage(incoming=True))

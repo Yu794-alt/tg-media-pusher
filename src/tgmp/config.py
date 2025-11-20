@@ -8,4 +8,6 @@ API_ID=os.getenv("API_ID", "")
 API_HASH=os.getenv("API_HASH", "")
 PHONE=os.getenv("PHONE", "")
 GEMINI_API_KEY=os.getenv("GEMINI_API_KEY", "")
+DATABASE = os.getenv("DATABASE", "")
+DB_SCHEMA= os.getenv("DB_SCHEMA", "")
 

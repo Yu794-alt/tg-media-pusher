@@ -16,12 +16,17 @@
                     <button class="btn-secondary text-primary">How it works</button>
                 </li>
                 <li>
-                    <button class="btn-secondary text-primary">Contacts</button>
+                    <a href="/config">
+                        <button class="btn-secondary text-primary">
+                            Configuration
+                        </button>
+                    </a>
                 </li>
                 <li>
-                    <button class="btn-primary">Sign up</button>
+                    <button class="btn-primary" onclick="openModal()">Sign up</button>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+{% include 'layout/auth-modal.html' %}

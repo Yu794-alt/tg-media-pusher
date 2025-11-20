@@ -9,6 +9,14 @@
     @apply  hover:-translate-y-0.5 py-2 px-4 rounded-none transition-transform duration-300 ease-in-out cursor-pointer;
 }
 
+.input {
+    @apply flex flex-col gap-1;
+
+    input {
+       @apply border-1 rounded-sm py-0.5 px-1;
+    }
+}
+
 .card {
     @apply bg-background-secondary py-3 px-3 rounded w-3xs h-48 flex flex-col items-center gap-3 pt-12 [transition:transform_0.3s_ease,box-shadow_0.3s_ease] [transform:translateY(0)] hover:[transform:translateY(-8px)];
 }

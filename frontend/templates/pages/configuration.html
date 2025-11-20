@@ -1,0 +1,44 @@
+{% extends "index.html" %}
+
+{% block title %}Home - Configuration{% endblock %}
+
+{% block content %}
+<div class="h-full container my-10">
+    <div class="flex px-4 flex-col gap-3">
+        <div class="input">
+            <input id="tags" name="tags" placeholder="List of tags" type="text">
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-2 p-4 ">
+        <button
+                onclick="handelSend()"
+                class="btn-primary"
+                type="submit"
+        >
+            Send
+        </button>
+
+    </div>
+</div>
+<script>
+
+    const handelSend = () => {
+        const formData = {
+            tags: document.getElementById('tags').value,
+        }
+
+        fetch('/config', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+
+
+    }
+
+</script>
+
+{% endblock %}

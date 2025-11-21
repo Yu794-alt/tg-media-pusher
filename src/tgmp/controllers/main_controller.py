@@ -1,9 +1,11 @@
 import asyncio
+from turtledemo.sorting_animate import enable_keys
 from urllib import request
 
-from flask import Blueprint, render_template,jsonify, request, session, redirect, current_app as app
+from flask import Blueprint, render_template, jsonify, request, session, redirect, current_app as app
 from werkzeug.wrappers import Response as BaseResponseBlaBla
 
+from entities.rule_entity import Rule
 from services.user_service import UserService
 
 main_bp = Blueprint('main', __name__)
@@ -19,17 +21,20 @@ main_bp = Blueprint('main', __name__)
 def index():
     return render_template("pages/main.html")
 
+
 @main_bp.route("/config", methods=["GET", "POST"])
 def config():
-
     if request.method == "POST":
         data = request.get_json()
 
         if data:
             tags = data.get('tags', [])
             print(session['user_id'])
-
-
+            if session['user_id']:
+                user = UserService.find_user_by_id(session['user_id'])
+                Rule(user, tags)
+            else:
+                raise Exception("No user found")
 
     return render_template("pages/configuration.html")
 

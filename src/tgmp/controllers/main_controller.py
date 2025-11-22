@@ -1,29 +1,30 @@
-import asyncio
-from turtledemo.sorting_animate import enable_keys
 from urllib import request
 
 from flask import Blueprint, render_template, jsonify, request, session, redirect, current_app as app
 from werkzeug.wrappers import Response as BaseResponseBlaBla
 
-from entities.rule_entity import Rule
+
+from services.telegram_messager_service import TelegramMessagerService
 from services.user_service import UserService
 
 main_bp = Blueprint('main', __name__)
 
 
-# @main_bp.route("/", methods=["GET"])
-# def index():
-#     ms = app.config["TELEGRAM_MESSAGER_SERVICE"]
-#     task = asyncio.run_coroutine_threadsafe(ms.client.send_message(ms.entity, 'bla bla'), ms.loop)
-#     result = task.result()
-#     return {"message": f"{result}"}
+@main_bp.route("/1", methods=["GET"])
+def indexx():
+    # cast only for IDE IntelliCode
+    ms = cast(TelegramMessagerService,app.config["TELEGRAM_MESSAGER_SERVICE"])
+    client1 = ms.get_client('client1')
+    ms.send_message(client1,'me','hello channel')
+    return {"message": f"{ms.get_all_clients()}"}
+
 @main_bp.route("/", methods=["GET"])
 def index():
     return render_template("pages/main.html")
 
-
 @main_bp.route("/config", methods=["GET", "POST"])
 def config():
+
     if request.method == "POST":
         data = request.get_json()
 

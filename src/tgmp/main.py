@@ -7,7 +7,7 @@ from flask import Flask
 from flask_session import Session
 from livereload import Server
 
-from services.telegram.impl.telegram_conncet_chanel import TelegramConnectChannel
+from services.telegram.impl.telegram_connect_user import TelegramConnectUser
 from services.telegram_messager_service import TelegramMessagerService
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -52,9 +52,11 @@ def init_db():
 
 
 def run_services():
-    tg_connection = TelegramConnectChannel()
-    ms = TelegramMessagerService(tg_connection)
-    ms.create_new_thread()
+    tg_connection = TelegramConnectUser(config.PHONE,session_name="name")
+    ms = TelegramMessagerService()
+    ms.start()
+    # Don't add multiple clients with same session file (sqlite3 databases)
+    ms.add_client(tg_connection, 'client1')
     app.config['TELEGRAM_MESSAGER_SERVICE'] = ms
 
 

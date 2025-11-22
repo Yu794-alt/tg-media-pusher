@@ -80,7 +80,6 @@ class TelegramMessagerService:
             return {
                 'client_name': client_name,
                 'is_connected': client.is_connected(),
-                'is_user_authorized': client.is_user_authorized()
             }
         return None
 
@@ -115,8 +114,8 @@ class TelegramMessagerService:
 
         @client.on(events.NewMessage(outgoing=True))
         async def handle_outgoing_message(event):
-            if event.is_private:
-                await event.reply("Привет! Я получил твое сообщение!")
+            # if event.is_private:
+            #     await event.reply("Привет! Я получил твое сообщение!")
 
             print(f"[{client_name}] New message received: {event.message.text}")
 
@@ -158,6 +157,29 @@ class TelegramMessagerService:
         )
         return future.result()
 
+    async def remove_client_async(self, client_name: str):
+        """Удаляет клиент асинхронно"""
+        if client_name in self.clients:
+            client = self.clients[client_name]
+
+            # Останавливаем клиента
+            await client.disconnect()
+
+            # Удаляем из пула клиентов
+            del self.clients[client_name]
+            print(f"Клиент {client_name} успешно остановлен и удален")
+            return True
+        else:
+            print(f"Клиент {client_name} не найден")
+            return False
+
+    def remove_client(self, client_name: str):
+        """Удаляет клиент (потокобезопасно)"""
+        future = asyncio.run_coroutine_threadsafe(
+            self.remove_client_async(client_name),
+            self.loop
+        )
+        return future.result()
 # # ПОКА НЕ ТРОГАТЬ СНИЗУ
 #     async def send_video(self):
 #         folder = Media("D:\\tv", extensions=[".mp4", ".webm", ".avi"])

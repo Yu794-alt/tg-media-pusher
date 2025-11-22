@@ -57,7 +57,6 @@ def run_services():
     ms.start()
     # Don't add multiple clients with same session file (sqlite3 databases)
     ms.add_client(tg_connection, 'client1')
-    #ms.add_client(tg_connection, 'client2')
     app.config['TELEGRAM_MESSAGER_SERVICE'] = ms
 
 

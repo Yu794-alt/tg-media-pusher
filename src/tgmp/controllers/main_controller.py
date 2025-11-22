@@ -17,7 +17,7 @@ def indexx():
     ms = cast(TelegramMessagerService,app.config["TELEGRAM_MESSAGER_SERVICE"])
     client1 = ms.get_client('client1')
     ms.send_message(client1,'me','hello channel')
-    return {"message": f"ok"}
+    return {"message": f"{ms.get_all_clients()}"}
 @main_bp.route("/", methods=["GET"])
 def index():
     return render_template("pages/main.html")

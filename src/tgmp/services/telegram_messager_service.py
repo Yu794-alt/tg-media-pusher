@@ -49,7 +49,7 @@ class TelegramMessagerService:
         self._register_handlers(client, client_name)
 
         self.clients[client_name] = client
-        print(f"Клиент {client_name} успешно запущен")
+        print(f"Client {client_name} was successfully added")
 
         return client
 
@@ -62,11 +62,11 @@ class TelegramMessagerService:
         return future.result()
 
     async def send_message_async(self, client, recipient, message):
-        """Отправляет сообщение через указанного клиента"""
+        """Send message through client asynchronously"""
         await client.send_message(recipient, message)
 
     def send_message(self, client, recipient, message):
-        """Отправляет сообщение (потокобезопасно)"""
+        """Send message through client"""
         future = asyncio.run_coroutine_threadsafe(
             self.send_message_async(client, recipient, message),
             self.loop
@@ -74,7 +74,7 @@ class TelegramMessagerService:
         return future.result()
 
     def get_client_info(self, client_name):
-        """Возвращает информацию о клиенте"""
+        """Returns client info"""
         if client_name in self.clients:
             client = self.clients[client_name]
             return {
@@ -84,18 +84,18 @@ class TelegramMessagerService:
         return None
 
     def get_client(self, client_name) -> TelegramClient:
-        """Возвращает информацию о клиенте"""
+        """Returns client object"""
         if client_name in self.clients:
             return  self.clients[client_name]
         return None
 
     def get_all_clients(self):
-        """Возвращает информацию обо всех клиентах"""
+        """Returns all client objects"""
         return {name: self.get_client_info(name) for name in self.clients.keys()}
 
 
     def _register_handlers(self, client, client_name):
-        """Регистрирует обработчики событий для клиента"""
+        """Register handlers for client"""
 
         @client.on(events.NewMessage(incoming=True, from_users='Arkadiy', func=lambda e: e.media is not None))
         async def handle_new_message(event):
@@ -115,14 +115,14 @@ class TelegramMessagerService:
         @client.on(events.NewMessage(outgoing=True))
         async def handle_outgoing_message(event):
             if event.is_private:
-                await event.reply("Привет! Я получил твое сообщение!")
+                await event.reply("Hi! I received your message!")
 
             print(f"[{client_name}] New message received: {event.message.text}")
 
         # @self.client.on(events.NewMessage(incoming=True, func=lambda e: e.media is not None))
         # async def handle_incoming_message(event):
         #     # answer = generate_content(event.message.text)
-        #     # print(f"Новое сообщение в чате '{chat.title}' от {sender.first_name}: {event.message.text}")
+        #     # print(f"New message in chat '{chat.title}' from {sender.first_name}: {event.message.text}")
         #     # answer generate_content(event.message.text)
         #     if event.is_private:
         #         await event.reply(answer)
@@ -131,17 +131,16 @@ class TelegramMessagerService:
 
         @client.on(events.NewMessage)
         async def new_message_handler(event):
-            print(f"[{client_name}] Новое сообщение: {event.message.text}")
-            # Здесь можно обрабатывать сообщения
-            # Например, сохранять в базу, отправлять уведомления и т.д.
+            print(f"[{client_name}] New message received: {event.message.text}")
+
 
         @client.on(events.MessageEdited)
         async def edit_message_handler(event):
-            print(f"[{client_name}] Сообщение отредактировано: {event.message.text}")
+            print(f"[{client_name}] Message edited: {event.message.text}")
 
         @client.on(events.ChatAction)
         async def chat_action_handler(event):
-            print(f"[{client_name}] Действие в чате: {event}")
+            print(f"[{client_name}] Some action happened: {event}")
 
 
     async def get_chat_async(self, client: TelegramClient, chat_name: str=None):
@@ -158,42 +157,39 @@ class TelegramMessagerService:
         return future.result()
 
     async def remove_client_async(self, client_name: str):
-        """Удаляет клиент асинхронно"""
+        """Remove client async"""
         if client_name in self.clients:
             client = self.clients[client_name]
 
-            # Останавливаем клиента
+            # Before delete - disconnect client
             await client.disconnect()
 
-            # Удаляем из пула клиентов
+            # Remove from client pool
             del self.clients[client_name]
-            print(f"Клиент {client_name} успешно остановлен и удален")
+            print(f"Client {client_name} was successfully disconnected and removed")
             return True
         else:
-            print(f"Клиент {client_name} не найден")
+            print(f"Client {client_name} was not found")
             return False
 
     def remove_client(self, client_name: str):
-        """Удаляет клиент (потокобезопасно)"""
+        """Remove client"""
         future = asyncio.run_coroutine_threadsafe(
             self.remove_client_async(client_name),
             self.loop
         )
         return future.result()
-# # ПОКА НЕ ТРОГАТЬ СНИЗУ
+
 #     async def send_video(self):
 #         folder = Media("D:\\tv", extensions=[".mp4", ".webm", ".avi"])
 #         videos = folder.get_media_files()
 #
 #         for video in videos:
 #             await  self.client.send_file(self.entity, video)
-#             print(f"Отправлено: {video}")
+#             print(f"Sent: {video}")
 #
 #         return {"message": "Video folder retrieved successfully"}
 #
-#     async def send_message(self):
-#         await self.client.send_message(self.entity, "Hello, Channel! entity")
-#         return {"message": "Message sent successfully"}
 #
 #     def upload_files(self, files):
 #         for file in files:

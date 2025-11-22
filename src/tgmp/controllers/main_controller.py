@@ -11,7 +11,7 @@ from services.user_service import UserService
 main_bp = Blueprint('main', __name__)
 
 
-# @main_bp.route("/1", methods=["GET"])
+# @main_bp.route("/testMessage", methods=["GET"])
 # def indexx():
 #     # cast only for IDE IntelliCode
 #     ms = cast(TelegramMessagerService,app.config["TELEGRAM_MESSAGER_SERVICE"])

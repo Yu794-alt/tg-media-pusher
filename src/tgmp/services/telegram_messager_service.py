@@ -114,8 +114,8 @@ class TelegramMessagerService:
 
         @client.on(events.NewMessage(outgoing=True))
         async def handle_outgoing_message(event):
-            # if event.is_private:
-            #     await event.reply("Привет! Я получил твое сообщение!")
+            if event.is_private:
+                await event.reply("Привет! Я получил твое сообщение!")
 
             print(f"[{client_name}] New message received: {event.message.text}")
 

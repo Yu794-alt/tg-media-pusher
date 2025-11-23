@@ -3,7 +3,8 @@ from repository.rule_repository import RuleRepository
 
 
 class RuleService:
+    def __init__(self, rule_repository: RuleRepository):
+        self.rule_repository = rule_repository
 
-    @staticmethod
-    def create_rule(rule: Rule):
-        return RuleRepository.create_rule(rule)
+    def create_rule(self, rule: Rule):
+        return self.rule_repository.create_rule(rule)

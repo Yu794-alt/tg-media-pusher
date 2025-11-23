@@ -1,12 +1,13 @@
 from entities.candidate_entity import Candidate
-from src.tgmp import app
 
 
 class CandidateRepository:
+    def __init__(self, db_connection):
+        self.db_connection = db_connection
 
-    @staticmethod
-    def create_candidate(candidate: Candidate):
-        connect = app.config["db_connect"]
+
+    def create_candidate(self, candidate: Candidate):
+        connect = self.db_connection
 
         result = connect.execute("INSERT INTO candidates (tg_id, user_name, name, phone) VALUES(?, ?, ?, ?)",
                                  (candidate.tg_id, candidate.user_name, candidate.name, candidate.phone))

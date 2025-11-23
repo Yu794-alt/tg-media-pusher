@@ -6,7 +6,9 @@ from repository.analytic_record_repository import AnalyticRecordRepository
 
 
 class AnalyticRecordService:
+    def __init__(self, analytic_record_repository: AnalyticRecordRepository):
+        self.analytic_record_repository = analytic_record_repository
 
-    @staticmethod
-    def create_user(analytic_record: AnalyticRecord, user: User, rule: Rule, candidate: Candidate):
-        return AnalyticRecordRepository.analytic_record_candidate(analytic_record, user, rule, candidate)
+    def create_analytic_record(self, analytic_record: AnalyticRecord, user: User, rule: Rule, candidate: Candidate):
+        return self.analytic_record_repository.create_analytic_record(analytic_record, user, rule, candidate)
+

@@ -1,24 +1,49 @@
 import asyncio
 import threading
-import uuid
+from typing import Dict, Any
 
 import config
-from api.gemini import generate_content, upload_file
+from api.gemini import upload_file
 from telethon import events, TelegramClient
 
-from services.telegram.telegram_connect import TelegramConnect
-from services.cv_processing_service import CVProcessingService
+from factories.repository_factory import RepositoryFactory
+from factories.service_factory import ServiceFactory
+from services.infrastructure.db_service import DbService
+from services.infrastructure.telegram.telegram_connect import TelegramConnect
+from services.infrastructure.cv_processing_service import CVProcessingService
+
+
+# TelegramClient Wrapper for project purposes (need to store project's user_id and telegram_client for using inside handlers)
+class TeleAnalystTelegramClient:
+    def __init__(self, telegram_client: TelegramClient, user_id):
+        self.telegram_client = telegram_client
+        # save tele_analyst user_id
+        self.user_id = user_id
+
+
 
 class TelegramMessagerService:
+    # set types for fields
+    clients: Dict[Any, TeleAnalystTelegramClient]
+    repository_factory: RepositoryFactory
+    service_factory: ServiceFactory
 
     def __init__(self):
         self.clients = {}
         self.loop = None
         self.thread = None
         self.is_running = False
+        self.db_connection_string = config.DATABASE
+        self.db_connection = None
 
     def _start_async_loop(self):
         """Start asyncio loop in new thread"""
+
+        # create factories inside thread (sqlite3 throws errors when trying to use connect from different threads)
+        self.db_connection = DbService.get_db_connection(self.db_connection_string)
+        self.repository_factory = RepositoryFactory(self.db_connection)
+        self.service_factory = ServiceFactory(self.repository_factory)
+
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
         self.is_running = True
@@ -38,34 +63,36 @@ class TelegramMessagerService:
             self.loop.call_soon_threadsafe(self.loop.stop)
             self.is_running = False
 
-    async def add_client_async(self, telegram_connect: TelegramConnect, client_name: str = None):
+    async def add_client_async(self, telegram_connect: TelegramConnect, user_id : int):
         """Add client asynchronously"""
-
+        # creating TelegramClient object
         client = await telegram_connect.connect()
 
-        if client_name is None:
-            client_name = str(uuid.uuid4())
-        # Регистрируем обработчики событий
-        self._register_handlers(client, client_name)
+        if user_id is None:
+            raise ValueError("You must provide user_id to add client")
 
-        self.clients[client_name] = client
-        print(f"Client {client_name} was successfully added")
+        tele_analyst_client = TeleAnalystTelegramClient(client, user_id)
+        # Регистрируем обработчики событий
+        self._register_handlers(tele_analyst_client)
+
+        self.clients[user_id] = tele_analyst_client
+        print(f"Client for user id \"{user_id}\" was successfully added")
 
         return client
 
-    def add_client(self, telegram_connect: TelegramConnect, client_name: str = None):
+    def add_client(self, telegram_connect: TelegramConnect, user_id : int):
         """Add client"""
         future = asyncio.run_coroutine_threadsafe(
-            self.add_client_async(telegram_connect, client_name),
+            self.add_client_async(telegram_connect, user_id),
             self.loop
         )
         return future.result()
 
-    async def send_message_async(self, client, recipient, message):
+    async def send_message_async(self, client: TelegramClient, recipient, message):
         """Send message through client asynchronously"""
         await client.send_message(recipient, message)
 
-    def send_message(self, client, recipient, message):
+    def send_message(self, client:TelegramClient, recipient, message):
         """Send message through client"""
         future = asyncio.run_coroutine_threadsafe(
             self.send_message_async(client, recipient, message),
@@ -73,20 +100,20 @@ class TelegramMessagerService:
         )
         return future.result()
 
-    def get_client_info(self, client_name):
+    def get_client_info(self, user_id):
         """Returns client info"""
-        if client_name in self.clients:
-            client = self.clients[client_name]
+        if user_id in self.clients:
+            client = self.clients[user_id]
             return {
-                'client_name': client_name,
-                'is_connected': client.is_connected(),
+                'client_name': user_id,
+                'is_connected': client.telegram_client.is_connected(),
             }
         return None
 
-    def get_client(self, client_name) -> TelegramClient:
+    def get_telegram_client(self, user_id) -> TelegramClient:
         """Returns client object"""
-        if client_name in self.clients:
-            return  self.clients[client_name]
+        if user_id in self.clients:
+            return  self.clients[user_id].telegram_client
         return None
 
     def get_all_clients(self):
@@ -94,13 +121,13 @@ class TelegramMessagerService:
         return {name: self.get_client_info(name) for name in self.clients.keys()}
 
 
-    def _register_handlers(self, client, client_name):
-        """Register handlers for client"""
+    def _register_handlers(self, client : TeleAnalystTelegramClient):
+        """Register handlers for TeleAnalyst client"""
 
-        @client.on(events.NewMessage(incoming=True, from_users='Arkadiy', func=lambda e: e.media is not None))
+        @client.telegram_client.on(events.NewMessage(incoming=True, from_users='Arkadiy', func=lambda e: e.media is not None))
         async def handle_new_message(event):
             cv = event.message.document
-            dosc = await client.download_media(cv, file="./")
+            dosc = await client.download_media(cv, file="../../")
             # file = os.path.basename()
             file_gemini_reference_to_file = upload_file(dosc)
             tags_from_bd = "javascript, react, laravel"
@@ -110,14 +137,16 @@ class TelegramMessagerService:
             # if event.is_private and not event.out:
             #     await event.reply(answer)
 
-            print(f"[{client_name}] New message received: {event.message.text}")
+            print(f"[Client for user_id: {client.user_id}] New message received: {event.message.text}")
 
-        @client.on(events.NewMessage(outgoing=True))
+        @client.telegram_client.on(events.NewMessage(outgoing=True))
         async def handle_outgoing_message(event):
             if event.is_private:
                 await event.reply("Hi! I received your message!")
 
-            print(f"[{client_name}] New message received: {event.message.text}")
+            self.service_factory.create_user_service().find_user_by_id(client.user_id)
+
+            print(f"[Client for user_id: {client.user_id}] New message received: {event.message.text}")
 
         # @self.client.on(events.NewMessage(incoming=True, func=lambda e: e.media is not None))
         # async def handle_incoming_message(event):
@@ -129,18 +158,18 @@ class TelegramMessagerService:
         #
         #     print(f"New message received: {event.message.text}")
 
-        @client.on(events.NewMessage)
+        @client.telegram_client.on(events.NewMessage)
         async def new_message_handler(event):
-            print(f"[{client_name}] New message received: {event.message.text}")
+            print(f"[Client for user_id: {client.user_id}] New message received: {event.message.text}")
 
 
-        @client.on(events.MessageEdited)
+        @client.telegram_client.on(events.MessageEdited)
         async def edit_message_handler(event):
-            print(f"[{client_name}] Message edited: {event.message.text}")
+            print(f"[Client for user_id: {client.user_id}] Message edited: {event.message.text}")
 
-        @client.on(events.ChatAction)
+        @client.telegram_client.on(events.ChatAction)
         async def chat_action_handler(event):
-            print(f"[{client_name}] Some action happened: {event}")
+            print(f"[Client for user_id: {client.user_id}] Some action happened: {event}")
 
 
     async def get_chat_async(self, client: TelegramClient, chat_name: str=None):
@@ -156,26 +185,26 @@ class TelegramMessagerService:
         )
         return future.result()
 
-    async def remove_client_async(self, client_name: str):
+    async def remove_client_async(self, user_id: int):
         """Remove client async"""
-        if client_name in self.clients:
-            client = self.clients[client_name]
+        if user_id in self.clients:
+            client = self.clients[user_id]
 
             # Before delete - disconnect client
-            await client.disconnect()
+            await client.telegram_client.disconnect()
 
             # Remove from client pool
-            del self.clients[client_name]
-            print(f"Client {client_name} was successfully disconnected and removed")
+            del self.clients[user_id]
+            print(f"[Client for user_id: {client.user_id}] was successfully disconnected and removed")
             return True
         else:
-            print(f"Client {client_name} was not found")
+            print(f"Client for user_id: {user_id} was not found")
             return False
 
-    def remove_client(self, client_name: str):
+    def remove_client(self, user_id: int):
         """Remove client"""
         future = asyncio.run_coroutine_threadsafe(
-            self.remove_client_async(client_name),
+            self.remove_client_async(user_id),
             self.loop
         )
         return future.result()

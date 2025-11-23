@@ -2,7 +2,7 @@ from telethon import TelegramClient
 from telethon.sessions import StringSession
 
 import config
-from services.telegram.telegram_connect import TelegramConnect
+from services.infrastructure.telegram.telegram_connect import TelegramConnect
 
 class  TelegramConnectUser(TelegramConnect):
     def __init__(self, phone : str, string_session : str = None, session_name : str = None):

@@ -1,11 +1,8 @@
-from typing import cast
 from urllib import request
 
-from flask import Blueprint, render_template, jsonify, request, session, redirect, current_app as app
-from werkzeug.wrappers import Response as BaseResponseBlaBla
+from flask import Blueprint, render_template, request, session, redirect
 
 from entities.rule_entity import Rule
-from services.telegram_messager_service import TelegramMessagerService
 from services.user_service import UserService
 
 main_bp = Blueprint('main', __name__)

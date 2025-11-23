@@ -220,7 +220,6 @@
         #LeftBottomCircleFull1,
         #LeftBottomCircleFull {
         animation: pulseScale 2s ease-in-out infinite;
-        animation: pulseScale 2s ease-in-out infinite;
         transform-origin: center;
         transform-box: fill-box;
         }
@@ -269,11 +268,36 @@
         transform: translateX(1.2px) rotate(0.8deg);
         }
         }
-        #Document, #Plane {
+        #Document{
         animation: gentleSway 5s ease-in-out infinite;
         transform-box: fill-box;
         transform-origin: center;
         }
+
+
+        #Plane{
+        animation: float3d 4s ease-in-out infinite;
+        transform-box: fill-box;
+        transform-origin: center;
+        }
+@keyframes float3d {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+  }
+  20% {
+    transform: translate3d(1px, -1px, 2px) rotateX(2deg) rotateY(5deg) rotateZ(0.5deg);
+  }
+  40% {
+    transform: translate3d(-1px, 1px, -1px) rotateX(-1deg) rotateY(-5deg) rotateZ(-0.3deg);
+  }
+  60% {
+    transform: translate3d(0.5px, 0.5px, 1px) rotateX(1deg) rotateY(0.3deg) rotateZ(0.2deg);
+  }
+  80% {
+    transform: translate3d(-0.5px, -0.5px, -2px) rotateX(-0.5deg) rotateY(-0.2deg) rotateZ(-0.1deg);
+  }
+}
+
     </style>
 
 </svg>

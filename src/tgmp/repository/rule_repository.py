@@ -1,12 +1,12 @@
 from entities.rule_entity import Rule
-from src.tgmp import app
 
 
 class RuleRepository:
+    def __init__(self, db_connection):
+        self.db_connection = db_connection
 
-    @staticmethod
-    def create_rule(rule: Rule):
-        connect = app.config["db_connect"]
+    def create_rule(self,rule: Rule):
+        connect = self.db_connection
 
         result = connect.execute("INSERT INTO rules (tags, user_id) VALUES(?, ?)",
                                  (rule.tags, rule.user.id))

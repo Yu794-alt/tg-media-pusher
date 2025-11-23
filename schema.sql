@@ -41,5 +41,5 @@ CREATE TABLE IF NOT EXISTS analytic_records
     FOREIGN KEY (rule_id) REFERENCES rules (id)
 );
 
-
+INSERT OR IGNORE INTO users (id, login, password, salt) VALUES (1, 'admin','admin', 'e488093b-b456-4f5e-bc46-dd8be842395c')
 

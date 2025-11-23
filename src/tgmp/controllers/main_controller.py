@@ -1,8 +1,8 @@
+from typing import cast
 from urllib import request
-
-from flask import Blueprint, render_template, request, session, redirect
-
+from flask import Blueprint, render_template, request, session, redirect, current_app as app
 from entities.rule_entity import Rule
+from factories.service_factory import ServiceFactory
 from services.user_service import UserService
 
 main_bp = Blueprint('main', __name__)
@@ -30,7 +30,8 @@ def config():
             tags = data.get('tags', [])
             print(session['user_id'])
             if session['user_id']:
-                user = UserService.find_user_by_id(session['user_id'])
+                service_factory = cast(ServiceFactory, app.config["SERVICE_FACTORY"])
+                user = service_factory.create_user_service().find_user_by_id(session['user_id'])
                 Rule(user, tags)
             else:
                 raise Exception("No user found")
@@ -42,7 +43,9 @@ def config():
 def signup():
     username = request.form.get("login")
     password = request.form.get("password")
-    row_id = UserService.create_user(username, password)
+    # Cast only for IDE Code hints
+    service_factory = cast(ServiceFactory, app.config["SERVICE_FACTORY"])
+    row_id = service_factory.create_user_service().create_user(username, password)
     session["user_id"] = row_id
     # return jsonify({'message': 'successes',  'redirect1': '/'}), 200
     return redirect('/')

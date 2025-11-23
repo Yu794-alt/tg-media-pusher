@@ -2,11 +2,12 @@ from repository.analytic_record_repository import AnalyticRecordRepository
 from repository.candidate_repository import CandidateRepository
 from repository.rule_repository import RuleRepository
 from repository.user_repository import UserRepository
+from services.infrastructure.db_service import DbService
 
 
 class RepositoryFactory:
     def __init__(self, db_connection):
-        self.db_connection = db_connection
+        self.db_connection = DbService.get_db_connection(db_connection)
 
     def create_user_repository(self) -> UserRepository:
         return UserRepository(self.db_connection)

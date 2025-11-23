@@ -6,6 +6,8 @@ from flask import Flask
 from flask_session import Session
 from livereload import Server
 
+from factories.repository_factory import RepositoryFactory
+from factories.service_factory import ServiceFactory
 from services.infrastructure.db_service import DbService
 from services.infrastructure.telegram.impl.telegram_connect_user import TelegramConnectUser
 from services.infrastructure.telegram.telegram_messager_service import TelegramMessagerService
@@ -50,6 +52,11 @@ def run_services():
     # user_id = 1 is administrator client (for testing purposes)
     ms.add_client(tg_connection, 1)
     app.config['TELEGRAM_MESSAGER_SERVICE'] = ms
+    #create factories
+    repo_factory = RepositoryFactory(config.DATABASE)
+    app.config['REPOSITORY_FACTORY'] = repo_factory
+    service_factory = ServiceFactory(repo_factory)
+    app.config['SERVICE_FACTORY'] = service_factory
 
 
 def main():

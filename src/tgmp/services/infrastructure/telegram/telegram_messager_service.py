@@ -10,7 +10,7 @@ from factories.repository_factory import RepositoryFactory
 from factories.service_factory import ServiceFactory
 from services.infrastructure.db_service import DbService
 from services.infrastructure.telegram.telegram_connect import TelegramConnect
-from services.infrastructure.cv_processing_service import CVProcessingService
+from services.cv_processing_service import CVProcessingService
 
 
 # TelegramClient Wrapper for project purposes (need to store project's user_id and telegram_client for using inside handlers)
@@ -34,14 +34,12 @@ class TelegramMessagerService:
         self.thread = None
         self.is_running = False
         self.db_connection_string = config.DATABASE
-        self.db_connection = None
 
     def _start_async_loop(self):
         """Start asyncio loop in new thread"""
 
         # create factories inside thread (sqlite3 throws errors when trying to use connect from different threads)
-        self.db_connection = DbService.get_db_connection(self.db_connection_string)
-        self.repository_factory = RepositoryFactory(self.db_connection)
+        self.repository_factory = RepositoryFactory(self.db_connection_string)
         self.service_factory = ServiceFactory(self.repository_factory)
 
         self.loop = asyncio.new_event_loop()
@@ -72,13 +70,14 @@ class TelegramMessagerService:
             raise ValueError("You must provide user_id to add client")
 
         tele_analyst_client = TeleAnalystTelegramClient(client, user_id)
-        # Регистрируем обработчики событий
+
+        # Register handlers for newly-created client
         self._register_handlers(tele_analyst_client)
 
         self.clients[user_id] = tele_analyst_client
         print(f"Client for user id \"{user_id}\" was successfully added")
 
-        return client
+        return tele_analyst_client
 
     def add_client(self, telegram_connect: TelegramConnect, user_id : int):
         """Add client"""

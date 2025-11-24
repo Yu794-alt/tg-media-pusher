@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS analytic_records
     cv_path      TEXT,
     ai_result    TEXT,
     opinion      TEXT,
-    is_viewed    BOOLEAN DEFAULT 0,
+    is_viewed    BOOLEAN DEFAULT FALSE,
     candidate_id TEXT,
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (candidate_id) REFERENCES candidates (tg_id),

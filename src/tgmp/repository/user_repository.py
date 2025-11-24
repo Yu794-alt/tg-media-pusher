@@ -1,15 +1,15 @@
 import uuid
 
-from flask import current_app as app
-
 from entities.user_entity import User
 
 
 class UserRepository:
 
-    @staticmethod
-    def create_user(login, password):
-        connect = app.config["db_connect"]
+    def __init__(self, connect):
+        self.connect = connect
+
+    def create_user(self, login, password):
+        connect = self.connect
 
         result = connect.execute("INSERT INTO users (login, password, salt) VALUES(?, ?, ?)",
                                  (login, password, str(uuid.uuid4())))
@@ -17,10 +17,10 @@ class UserRepository:
         new_user_id = result.lastrowid
         return new_user_id
 
-    @staticmethod
-    def find_user_by_id(id):
-        connect = app.config["db_connect"]
-        row = connect.execute("SELECT * FROM users WHERE users.id = ? ", id)
+    def find_user_by_id(self, id):
+        connect = self.connect
+        cursor = connect.execute("SELECT * FROM users WHERE users.id = ? ", (id,))
+        row = cursor.fetchone()
         return User(
             row['id'],
             row['login'],

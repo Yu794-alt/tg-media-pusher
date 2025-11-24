@@ -1,18 +1,31 @@
 import asyncio
 import threading
 import uuid
+import requests
 
 import config
 from api.gemini import generate_content, upload_file
 from telethon import events, TelegramClient
 
-from services.telegram.telegram_connect import TelegramConnect
+from entities.analytic_record_entiry import AnalyticRecord
+from entities.candidate_entity import Candidate
+# from flask import session, current_app as app
+
+from factories.repository_factory import RepositoryFactory
+from factories.service_factory import ServiceFactory
 from services.cv_processing_service import CVProcessingService
+from services.telegram.telegram_connect import TelegramConnect
+from services.user_service import UserService
+from utils.helpers.db_connection_helper import DBConnection
+
 
 class TelegramMessagerService:
+    repository_factory: RepositoryFactory
+    service_factory: ServiceFactory
 
-    def __init__(self):
+    def __init__(self, app):
         self.clients = {}
+        self.flask_config = app.config
         self.loop = None
         self.thread = None
         self.is_running = False
@@ -21,6 +34,8 @@ class TelegramMessagerService:
         """Start asyncio loop in new thread"""
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
+        self.repository_factory = RepositoryFactory(DBConnection.get_SQL3_connection(config.DATABASE))
+        self.service_factory = ServiceFactory(self.repository_factory)
         self.is_running = True
         self.loop.run_forever()
 
@@ -86,13 +101,12 @@ class TelegramMessagerService:
     def get_client(self, client_name) -> TelegramClient:
         """Returns client object"""
         if client_name in self.clients:
-            return  self.clients[client_name]
+            return self.clients[client_name]
         return None
 
     def get_all_clients(self):
         """Returns all client objects"""
         return {name: self.get_client_info(name) for name in self.clients.keys()}
-
 
     def _register_handlers(self, client, client_name):
         """Register handlers for client"""
@@ -101,14 +115,20 @@ class TelegramMessagerService:
         async def handle_new_message(event):
             cv = event.message.document
             dosc = await client.download_media(cv, file="./")
-            # file = os.path.basename()
             file_gemini_reference_to_file = upload_file(dosc)
-            tags_from_bd = "javascript, react, laravel"
-            result = CVProcessingService.get_ai_result(tags_from_bd, file_gemini_reference_to_file)
-            print(result)
-            # answer = generate_content(event.message.text)
-            # if event.is_private and not event.out:
-            #     await event.reply(answer)
+
+            rule_repository = self.repository_factory.create_rule_repository()
+
+            rules = rule_repository.find_rule_by_user_id(client_name)
+
+            result = CVProcessingService.get_ai_result(rules.tags, file_gemini_reference_to_file)
+
+            candidate = self.service_factory.create_candidate_service().get_or_create_candidate(
+                Candidate(event.chat.username, event.chat.id, event.chat.first_name, event.chat.phone))
+
+            self.service_factory.create_analytic_record_service().create_analytic_record(
+                AnalyticRecord(client_name, rules.id, dosc, result, '', candidate.tg_id)
+            )
 
             print(f"[{client_name}] New message received: {event.message.text}")
 
@@ -133,7 +153,6 @@ class TelegramMessagerService:
         async def new_message_handler(event):
             print(f"[{client_name}] New message received: {event.message.text}")
 
-
         @client.on(events.MessageEdited)
         async def edit_message_handler(event):
             print(f"[{client_name}] Message edited: {event.message.text}")
@@ -143,42 +162,45 @@ class TelegramMessagerService:
             print(f"[{client_name}] Some action happened: {event}")
 
 
-    async def get_chat_async(self, client: TelegramClient, chat_name: str=None):
-        if chat_name is None:
-            chat_name = config.CHANNEL_LINK
-        chat = await client.get_entity(chat_name)
-        return chat
+async def get_chat_async(self, client: TelegramClient, chat_name: str = None):
+    if chat_name is None:
+        chat_name = config.CHANNEL_LINK
+    chat = await client.get_entity(chat_name)
+    return chat
 
-    def get_chat(self, client: TelegramClient, chat_name: str=None):
-        future = asyncio.run_coroutine_threadsafe(
-            self.get_chat_async(client, chat_name),
-            self.loop
-        )
-        return future.result()
 
-    async def remove_client_async(self, client_name: str):
-        """Remove client async"""
-        if client_name in self.clients:
-            client = self.clients[client_name]
+def get_chat(self, client: TelegramClient, chat_name: str = None):
+    future = asyncio.run_coroutine_threadsafe(
+        self.get_chat_async(client, chat_name),
+        self.loop
+    )
+    return future.result()
 
-            # Before delete - disconnect client
-            await client.disconnect()
 
-            # Remove from client pool
-            del self.clients[client_name]
-            print(f"Client {client_name} was successfully disconnected and removed")
-            return True
-        else:
-            print(f"Client {client_name} was not found")
-            return False
+async def remove_client_async(self, client_name: str):
+    """Remove client async"""
+    if client_name in self.clients:
+        client = self.clients[client_name]
 
-    def remove_client(self, client_name: str):
-        """Remove client"""
-        future = asyncio.run_coroutine_threadsafe(
-            self.remove_client_async(client_name),
-            self.loop
-        )
-        return future.result()
+        # Before delete - disconnect client
+        await client.disconnect()
+
+        # Remove from client pool
+        del self.clients[client_name]
+        print(f"Client {client_name} was successfully disconnected and removed")
+        return True
+    else:
+        print(f"Client {client_name} was not found")
+        return False
+
+
+def remove_client(self, client_name: str):
+    """Remove client"""
+    future = asyncio.run_coroutine_threadsafe(
+        self.remove_client_async(client_name),
+        self.loop
+    )
+    return future.result()
 
 #     async def send_video(self):
 #         folder = Media("D:\\tv", extensions=[".mp4", ".webm", ".avi"])

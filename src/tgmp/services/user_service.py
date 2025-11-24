@@ -1,12 +1,13 @@
-from repository.user_repository import  UserRepository
+from repository.user_repository import UserRepository
 
 
 class UserService:
 
-    @staticmethod
-    def create_user(login, password):
-        return UserRepository.create_user(login, password)
+    def __init__(self, user_repository: UserRepository):
+        self.user_repository = user_repository
 
-    @staticmethod
-    def find_user_by_id(id):
-        return UserRepository.find_user_by_id(id)
+    def create_user(self, login, password):
+        return self.user_repository.create_user(login, password)
+
+    def find_user_by_id(self, id):
+        return self.user_repository.find_user_by_id(id)

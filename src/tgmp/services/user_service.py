@@ -11,3 +11,6 @@ class UserService:
 
     def find_user_by_id(self, id):
         return self.user_repository.find_user_by_id(id)
+
+    def find_user_by_login(self, login):
+        return self.user_repository.find_user_by_login(login)

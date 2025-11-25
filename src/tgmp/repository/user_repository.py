@@ -27,3 +27,19 @@ class UserRepository:
             row['password'],
             row['salt'],
         )
+
+    def find_user_by_login(self, login):
+        connect = self.connect
+        cursor = connect.execute("SELECT * FROM users WHERE users.login = ? ", (login,))
+        row = cursor.fetchone()
+        cursor.close()
+
+        if row is None:
+            return None
+
+        return User(
+            row['id'],
+            row['login'],
+            row['password'],
+            row['salt'],
+        )

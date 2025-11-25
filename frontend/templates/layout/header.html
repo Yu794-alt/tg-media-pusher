@@ -15,6 +15,7 @@
                 <li>
                     <button class="btn-secondary text-primary">How it works</button>
                 </li>
+                {% if session["user_id"] %}
                 <li>
                     <a href="/config">
                         <button class="btn-secondary text-primary">
@@ -23,10 +24,18 @@
                     </a>
                 </li>
                 <li>
-                    <button class="btn-primary" onclick="openModal()">Sign up</button>
+                    <a class="nav-link" href="/logout">
+                        <button class="btn-primary">Logout</button>
+                    </a>
                 </li>
+                {% else %}
+                <li>
+                    <button class="btn-primary" onclick="openModal('modal-auth')">Sign in</button>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </div>
 </nav>
 {% include 'layout/auth-modal.html' %}
+{% include 'layout/register-modal.html' %}

@@ -6,6 +6,7 @@
     --font-sans: "Roboto Condensed", sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-red-500: oklch(63.7% 0.237 25.331);
     --color-blue-500: oklch(62.3% 0.214 259.815);
     --color-gray-400: oklch(70.7% 0.022 261.325);
     --color-gray-500: oklch(55.1% 0.027 264.364);
@@ -263,6 +264,9 @@
   .my-\[12px\] {
     margin-block: 12px;
   }
+  .mb-0 {
+    margin-bottom: calc(var(--spacing) * 0);
+  }
   .block {
     display: block;
   }
@@ -320,6 +324,12 @@
   .max-w-md {
     max-width: var(--container-md);
   }
+  .flex-1 {
+    flex: 1;
+  }
+  .flex-auto {
+    flex: auto;
+  }
   .scale-60 {
     --tw-scale-x: 60%;
     --tw-scale-y: 60%;
@@ -328,6 +338,9 @@
   }
   .transform {
     transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
+  }
+  .cursor-pointer {
+    cursor: pointer;
   }
   .grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -413,6 +426,9 @@
   .py-10 {
     padding-block: calc(var(--spacing) * 10);
   }
+  .text-center {
+    text-align: center;
+  }
   .text-2xl {
     font-size: var(--text-2xl);
     line-height: var(--tw-leading, var(--text-2xl--line-height));
@@ -444,11 +460,20 @@
     --tw-font-weight: var(--font-weight-semibold);
     font-weight: var(--font-weight-semibold);
   }
+  .text-background-primary {
+    color: var(--color-background-primary);
+  }
   .text-gray-400 {
     color: var(--color-gray-400);
   }
   .text-primary {
     color: var(--color-primary);
+  }
+  .text-red-500 {
+    color: var(--color-red-500);
+  }
+  .text-secondary {
+    color: var(--color-secondary);
   }
   .text-tertiary {
     color: var(--color-tertiary);

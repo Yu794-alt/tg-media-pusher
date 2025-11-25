@@ -1,0 +1,92 @@
+<div id="modal-register" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4 transform transition-transform duration-200 scale-60">
+        <!-- Заголовок -->
+        <div class="flex justify-between  items-center p-4">
+            <h3 class="text-lg font-semibold">Sign up</h3>
+            <div class="flex gap-10 items-center">
+                <div class="text-xs text-secondary cursor-pointer" onclick="handleRedirectSignIn()">
+                    Sign in
+                </div>
+                <button
+                        onclick="closeModal('modal-register')"
+                        class="text-gray-400 hover:text-gray-600 text-2xl leading-none "
+                >
+                    &times;
+                </button>
+            </div>
+        </div>
+        <div class="flex px-4 flex-col gap-3">
+            <div class="input">
+                <input id="login" name="login" placeholder="Login" type="text">
+            </div>
+            <div class="input">
+                <input id="password" name="password" type="password" placeholder="Password">
+            </div>
+            <div class="input">
+                <input id="confirm" name="confirm" type="password" placeholder="Confirm password">
+            </div>
+            <span id="sign-in-validation" class="text-xs text-red-500 hidden">'bla bla'</span>
+        </div>
+        <div class="flex justify-end gap-2 p-4 ">
+            <button
+                    onclick="closeModal('modal-register')"
+                    class="btn-secondary"
+            >
+                Cancel
+            </button>
+            <button
+                    onclick="handleRegisterConfirm()"
+                    class="btn-primary"
+            >
+                Submit
+            </button>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+    function handleRegisterConfirm(e) {
+        const confirmPassword = document.getElementById('confirm').value
+        const password = document.getElementById('password').value
+
+        if (confirmPassword !== password) {
+            const error = document.getElementById('sign-in-validation')
+            error.textContent = 'The password and confirm password do not match.'
+            error.classList.remove('hidden');
+            return
+        }
+
+        const formData = {
+            login: document.getElementById('login').value,
+            password: password,
+        }
+
+        fetch('/signup', {
+            method: "POST",
+            body: formData
+        })
+        closeModal('modal-register');
+    }
+
+    function handleRedirectSignIn(e) {
+        closeModal('modal-register');
+        openModal('modal-auth');
+    }
+
+    // Закрытие по клику вне модального окна
+    document.getElementById('modal-register').addEventListener('click', function (e) {
+        if (e.target === this) {
+            closeModal('modal-register');
+        }
+    });
+
+    // Закрытие по клавише Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeModal('modal-register');
+        }
+    });
+</script>

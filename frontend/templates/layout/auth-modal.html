@@ -1,39 +1,37 @@
-<div id="modal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
+<div id="modal-auth" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4 transform transition-transform duration-200 scale-60">
         <!-- Заголовок -->
-        <div class="flex justify-between items-center p-4">
-            <h3 class="text-lg font-semibold">Sign up</h3>
-            <button
-                    onclick="closeModal()"
-                    class="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-            >
-                &times;
-            </button>
+        <div class="flex justify-between  items-center p-4">
+            <h3 class="text-lg font-semibold">Sign in</h3>
+            <div class="flex gap-10 items-center">
+                <div class="text-xs text-secondary cursor-pointer" onclick="handleRedirectSignUp()">
+                    Sign up
+                </div>
+                <button
+                        onclick="closeModal('modal-auth')"
+                        class="text-gray-400 hover:text-gray-600 text-2xl leading-none "
+                >
+                    &times;
+                </button>
+            </div>
         </div>
-
-        <!-- Контент -->
-        <form action="/signup" method="post">
+        <form action="/signin" method="post">
             <div class="flex px-4 flex-col gap-3">
-                <!--            <form type="POST">-->
                 <div class="input">
                     <input id="login" name="login" placeholder="Login" type="text">
                 </div>
                 <div class="input">
                     <input id="password" name="password" type="password" placeholder="Password">
                 </div>
-                <!--            </form>-->
             </div>
-
-            <!-- Футер -->
             <div class="flex justify-end gap-2 p-4 ">
                 <button
-                        onclick="closeModal()"
+                        onclick="closeModal('modal-auth')"
                         class="btn-secondary"
                 >
                     Cancel
                 </button>
                 <button
-                        onclick="handleConfirm()"
                         class="btn-primary"
                         type="submit"
                 >
@@ -48,48 +46,38 @@
 
 <script>
 
-    const signUp = () => {
-        console.log()
-    }
-
-    function openModal() {
-        const modal = document.getElementById('modal');
+    function openModal(modalId) {
+        console.log('modalId', modalId)
+        const modal = document.getElementById(modalId);
         modal.classList.remove('hidden');
         setTimeout(() => {
             modal.querySelector('div').classList.remove('scale-60');
         }, 10);
     }
 
-    function closeModal() {
-        const modal = document.getElementById('modal');
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
         modal.querySelector('div').classList.add('scale-60');
         setTimeout(() => {
             modal.classList.add('hidden');
         }, 150);
     }
 
-    function handleConfirm(e) {
-        const formData = {
-            login: document.getElementById('login').value,
-            password: document.getElementById('password').value,
-        }
 
-
-        console.log('event', formData)
-        closeModal();
+    function handleRedirectSignUp(e) {
+        closeModal('modal-auth');
+        openModal('modal-register');
     }
 
-    // Закрытие по клику вне модального окна
-    document.getElementById('modal').addEventListener('click', function (e) {
+    document.getElementById('modal-auth').addEventListener('click', function (e) {
         if (e.target === this) {
-            closeModal();
+            closeModal('modal-auth');
         }
     });
 
-    // Закрытие по клавише Escape
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-            closeModal();
+            closeModal('modal-auth');
         }
     });
 </script>

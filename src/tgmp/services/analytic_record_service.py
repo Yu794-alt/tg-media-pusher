@@ -12,3 +12,6 @@ class AnalyticRecordService:
 
     def create_analytic_record(self, analytic_record: AnalyticRecord):
         return self.analytic_record_repository.create_analytic_record(analytic_record)
+
+    def get_analytic_record_by_user_id(self, user_id) -> list[AnalyticRecord]:
+        return self.analytic_record_repository.get_analytic_record_by_user_id(user_id)

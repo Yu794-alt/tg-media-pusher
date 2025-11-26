@@ -1,0 +1,19 @@
+{% extends "index.html" %}
+
+{% block title %}Home - My Flask App{% endblock %}
+
+{% block content %}
+<section class="h-full bg-background-primary">
+    <div class="container flex flex-row justify-center items-center h-96 ">
+
+        {% if message %}
+        <h2>
+            {{ message }}
+        </h2>
+        {% endif %}
+
+    </div>
+</section>
+
+
+{% endblock %}

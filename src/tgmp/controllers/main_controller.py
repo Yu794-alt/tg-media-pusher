@@ -49,13 +49,13 @@ def signin():
 
     service_factory = cast(ServiceFactory, app.config['SERVICE_FACTORY'])
 
-    row_id = service_factory.create_user_service().find_user_by_login(username)
+    user = service_factory.create_user_service().find_user_by_login(username)
 
-    if row_id is None:
+    if user is None:
         return render_template('pages/error.html', message="User not found")
 
     # UserService(UserRepository(app.config['db_connect'])).create_user(username, password)
-    session["user_id"] = row_id
+    session["user_id"] = user.id
     # return jsonify({'message': 'successes',  'redirect1': '/'}), 200
     return redirect('/')
 
@@ -68,10 +68,11 @@ def signup():
 
     service_factory = cast(ServiceFactory, app.config['SERVICE_FACTORY'])
 
-    row_id = service_factory.create_user_service().create_user(username, password)
-    session["user_id"] = row_id
+    user_id = service_factory.create_user_service().create_user(username, password)
+    session["user_id"] = user_id
     # return jsonify({'message': 'successes',  'redirect1': '/'}), 200
     return redirect('/')
+
 
 @main_bp.route("/dashboard", methods=["GET"])
 def dashboard():
@@ -79,14 +80,12 @@ def dashboard():
     if user_id is None:
         return render_template("pages/error.html", message="User not found"'/')
 
-
     service_factory = cast(ServiceFactory, app.config['SERVICE_FACTORY'])
 
-    # analytic_records = service_factory.create_analytic_record_service().(username, password)
-
+    analytic_records = service_factory.create_analytic_record_service().get_analytic_record_by_user_id(user_id)
 
     # return jsonify({'message': 'successes',  'redirect1': '/'}), 200
-    return render_template('pages/dashboard.html', analytic_records=[])
+    return render_template('pages/dashboard.html', analytic_records=analytic_records)
 
 
 @main_bp.route("/logout")

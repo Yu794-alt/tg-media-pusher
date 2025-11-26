@@ -127,7 +127,7 @@ class TelegramMessagerService:
                 Candidate(event.chat.username, event.chat.id, event.chat.first_name, event.chat.phone))
 
             self.service_factory.create_analytic_record_service().create_analytic_record(
-                AnalyticRecord(client_name, rules.id, dosc, result, '', candidate.tg_id)
+                AnalyticRecord(client_name, rules, dosc, result, '', candidate)
             )
 
             print(f"[{client_name}] New message received: {event.message.text}")

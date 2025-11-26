@@ -8,7 +8,7 @@ class UserRepository:
     def __init__(self, connect):
         self.connect = connect
 
-    def create_user(self, login, password):
+    def create_user(self, login, password) -> int:
         connect = self.connect
 
         result = connect.execute("INSERT INTO users (login, password, salt) VALUES(?, ?, ?)",
@@ -17,7 +17,7 @@ class UserRepository:
         new_user_id = result.lastrowid
         return new_user_id
 
-    def find_user_by_id(self, id):
+    def find_user_by_id(self, id) -> User:
         connect = self.connect
         cursor = connect.execute("SELECT * FROM users WHERE users.id = ? ", (id,))
         row = cursor.fetchone()
@@ -28,7 +28,7 @@ class UserRepository:
             row['salt'],
         )
 
-    def find_user_by_login(self, login):
+    def find_user_by_login(self, login) -> User:
         connect = self.connect
         cursor = connect.execute("SELECT * FROM users WHERE users.login = ? ", (login,))
         row = cursor.fetchone()

@@ -276,9 +276,6 @@
   .hidden {
     display: none;
   }
-  .table {
-    display: table;
-  }
   .h-3\.5 {
     height: calc(var(--spacing) * 3.5);
   }
@@ -324,6 +321,9 @@
   .max-w-md {
     max-width: var(--container-md);
   }
+  .table-auto {
+    table-layout: auto;
+  }
   .scale-60 {
     --tw-scale-x: 60%;
     --tw-scale-y: 60%;
@@ -347,6 +347,9 @@
   }
   .items-center {
     align-items: center;
+  }
+  .items-start {
+    align-items: flex-start;
   }
   .justify-between {
     justify-content: space-between;
@@ -420,6 +423,9 @@
   .py-10 {
     padding-block: calc(var(--spacing) * 10);
   }
+  .pt-0 {
+    padding-top: calc(var(--spacing) * 0);
+  }
   .text-2xl {
     font-size: var(--text-2xl);
     line-height: var(--tw-leading, var(--text-2xl--line-height));
@@ -438,6 +444,9 @@
   }
   .text-\[8px\] {
     font-size: 8px;
+  }
+  .text-\[12px\] {
+    font-size: 12px;
   }
   .leading-none {
     --tw-leading: 1;

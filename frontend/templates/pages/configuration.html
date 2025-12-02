@@ -5,11 +5,31 @@
 {% block content %}
 <div class="h-full container my-10">
     <div class="flex px-4 flex-col gap-3">
+        <div class="flex flex-col gap-3">
+            <h3 class="font-bold text-primary">New </h3>
+            <div class="input">
+                <input id="phone" name="phone" placeholder="phone" type="text">
+            </div>
+
+            <div class="input">
+                <input id="login-token" name="login-token" placeholder="Login token" type="text">
+            </div>
+            <div class="flex justify-end gap-2 p-4 ">
+                <button
+                        onclick="handelNewClient()"
+                        class="btn-primary"
+                        type="submit"
+                >
+                    Create new tg client
+                </button>
+            </div>
+        </div>
         <div class="input">
             <input id="tags" name="tags" placeholder="List of tags" type="text">
         </div>
-    </div>
 
+
+    </div>
     <div class="flex justify-end gap-2 p-4 ">
         <button
                 onclick="handelSend()"
@@ -18,9 +38,10 @@
         >
             Send
         </button>
-
     </div>
 </div>
+{% include 'layout/notify-modal.html' %}
+
 <script>
 
     const handelSend = () => {
@@ -35,8 +56,29 @@
             },
             body: JSON.stringify(formData)
         })
+    }
 
+    const handelNewClient = async () => {
+        const formData = {
+            phone: document.getElementById('phone').value,
+            tg_code: document.getElementById('login-token').value,
+        }
 
+        const response = await fetch('/newClient', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+
+        const data = await response.json()
+
+        if (data.code === codes.TG_CODE_REQUIRED){
+            const errorMessage = document.getElementById('modal-notify-error')
+            errorMessage.textContent = data.error
+            openModal('modal-notify')
+        }
     }
 
 </script>

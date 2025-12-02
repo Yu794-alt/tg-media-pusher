@@ -13,3 +13,6 @@ class RuleService:
 
     def find_rule_by_user(self, user: User):
         return self.rule_repository.find_rule_by_user(user)
+
+    def find_all_rules_by_user(self, user: User) -> list[Rule]:
+        return self.rule_repository.find_all_rules_by_user(user)

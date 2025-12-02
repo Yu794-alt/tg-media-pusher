@@ -15,7 +15,6 @@ from factories.repository_factory import RepositoryFactory
 from factories.service_factory import ServiceFactory
 from services.cv_processing_service import CVProcessingService
 from services.telegram.telegram_connect import TelegramConnect
-from services.user_service import UserService
 from utils.helpers.db_connection_helper import DBConnection
 
 
@@ -29,6 +28,13 @@ class TelegramMessagerService:
         self.loop = None
         self.thread = None
         self.is_running = False
+
+    def telegram_connector(self, telegram_connect: TelegramConnect):
+        future = asyncio.run_coroutine_threadsafe(
+            telegram_connect.connect(),
+            self.loop
+        )
+        return future.result()
 
     def _start_async_loop(self):
         """Start asyncio loop in new thread"""
@@ -53,10 +59,8 @@ class TelegramMessagerService:
             self.loop.call_soon_threadsafe(self.loop.stop)
             self.is_running = False
 
-    async def add_client_async(self, telegram_connect: TelegramConnect, client_name: str = None):
+    async def add_client_async(self, client: TelegramClient, client_name: str = None):
         """Add client asynchronously"""
-
-        client = await telegram_connect.connect()
 
         if client_name is None:
             client_name = str(uuid.uuid4())
@@ -68,10 +72,10 @@ class TelegramMessagerService:
 
         return client
 
-    def add_client(self, telegram_connect: TelegramConnect, client_name: str = None):
+    def add_client(self, client: TelegramClient, client_name: str = None):
         """Add client"""
         future = asyncio.run_coroutine_threadsafe(
-            self.add_client_async(telegram_connect, client_name),
+            self.add_client_async(client, client_name),
             self.loop
         )
         return future.result()
@@ -111,7 +115,8 @@ class TelegramMessagerService:
     def _register_handlers(self, client, client_name):
         """Register handlers for client"""
 
-        @client.on(events.NewMessage(incoming=True, from_users='Arkadiy', func=lambda e: e.media is not None))
+        @client.on(events.NewMessage(incoming=True, from_users='Arkadiy',
+                                     func=lambda e: e.media and hasattr(e.media, 'document')))
         async def handle_new_message(event):
             cv = event.message.document
             dosc = await client.download_media(cv, file="./")
@@ -132,34 +137,34 @@ class TelegramMessagerService:
 
             print(f"[{client_name}] New message received: {event.message.text}")
 
-        @client.on(events.NewMessage(outgoing=True))
-        async def handle_outgoing_message(event):
-            if event.is_private:
-                await event.reply("Hi! I received your message!")
-
-            print(f"[{client_name}] New message received: {event.message.text}")
-
-        # @self.client.on(events.NewMessage(incoming=True, func=lambda e: e.media is not None))
-        # async def handle_incoming_message(event):
-        #     # answer = generate_content(event.message.text)
-        #     # print(f"New message in chat '{chat.title}' from {sender.first_name}: {event.message.text}")
-        #     # answer generate_content(event.message.text)
+        # @client.on(events.NewMessage(outgoing=True))
+        # async def handle_outgoing_message(event):
         #     if event.is_private:
-        #         await event.reply(answer)
+        #         await event.reply("Hi! I received your message!")
         #
-        #     print(f"New message received: {event.message.text}")
-
-        @client.on(events.NewMessage)
-        async def new_message_handler(event):
-            print(f"[{client_name}] New message received: {event.message.text}")
-
-        @client.on(events.MessageEdited)
-        async def edit_message_handler(event):
-            print(f"[{client_name}] Message edited: {event.message.text}")
-
-        @client.on(events.ChatAction)
-        async def chat_action_handler(event):
-            print(f"[{client_name}] Some action happened: {event}")
+        #     print(f"[{client_name}] New message received: {event.message.text}")
+        #
+        # # @self.client.on(events.NewMessage(incoming=True, func=lambda e: e.media is not None))
+        # # async def handle_incoming_message(event):
+        # #     # answer = generate_content(event.message.text)
+        # #     # print(f"New message in chat '{chat.title}' from {sender.first_name}: {event.message.text}")
+        # #     # answer generate_content(event.message.text)
+        # #     if event.is_private:
+        # #         await event.reply(answer)
+        # #
+        # #     print(f"New message received: {event.message.text}")
+        #
+        # @client.on(events.NewMessage)
+        # async def new_message_handler(event):
+        #     print(f"[{client_name}] New message received: {event.message.text}")
+        #
+        # @client.on(events.MessageEdited)
+        # async def edit_message_handler(event):
+        #     print(f"[{client_name}] Message edited: {event.message.text}")
+        #
+        # @client.on(events.ChatAction)
+        # async def chat_action_handler(event):
+        #     print(f"[{client_name}] Some action happened: {event}")
 
 
 async def get_chat_async(self, client: TelegramClient, chat_name: str = None):

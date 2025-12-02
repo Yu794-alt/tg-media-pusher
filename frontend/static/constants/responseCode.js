@@ -1,0 +1,6 @@
+const codes = {
+    TG_CODE_REQUIRED: 2,
+    TG_PASSWORD_REQUIRED: 3,
+    TG_CONNECT_SUCCESS: 4,
+    SOMETHING_WRONG: 5,
+};

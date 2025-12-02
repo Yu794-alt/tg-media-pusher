@@ -3,14 +3,26 @@
 {% block title %}Home - My Flask App{% endblock %}
 
 {% block content %}
-<section class="h-full bg-background-primary">
+<section class="h-full  flex flex-col bg-background-primary">
 
-    <div>
-        <table class="table table-striped">
+    <div class="my-10 gap-2 flex container">
+        {% for rules in rules %}
+        <div id="{{rules.id}}" class="card flex items-start cursor-pointer">
+            <span class="text-[12px] text-primary">Technologies:</span>
+            <div class="font-bold pt-0 text-primary">{{rules.tags}}</div>
+            <span class="text-[12px] text-primary">Date Start: {{rules.date_start}}</span>
+            <span class="text-[12px] text-primary">Date End: {{rules.date_end}}</span>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    <div class="container flex items-center justify-center">
+        <table class="table-auto w-full">
             <thead>
             <tr>
-                <th>Symbol</th>
-                <th>Shares</th>
+                <th>id</th>
+                <th>cv_path</th>
                 <th>Price</th>
                 <th>Transacted</th>
                 <th>Transacted</th>
@@ -27,7 +39,6 @@
                 <td>{{row.ai_result}}</td>
                 <td>{{row.candidate.tg_id}}</td>
             </tr>
-
             {% endfor %}
             </tbody>
         </table>

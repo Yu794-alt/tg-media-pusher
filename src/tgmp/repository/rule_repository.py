@@ -1,3 +1,4 @@
+from entities.analytic_record_entiry import AnalyticRecord
 from entities.rule_entity import Rule
 from entities.user_entity import User
 
@@ -25,6 +26,32 @@ class RuleRepository:
             row['id'],
             row['tags'],
         )
+
+    def find_all_rules_by_user(self, user: User) -> list[Rule]:
+        connect = self.connect
+
+        cursor = connect.execute("""SELECT id, tags, date_start, date_end
+                                    FROM rules
+                                    WHERE user_id = ? """,
+                                 (user.id,))
+        rows = cursor.fetchall()
+        cursor.close()
+
+        rules: list[Rule] = []
+
+        if len(rows) == 0:
+            return rules
+
+        for row in rows:
+            rules.append(Rule(
+                id=row['id'],
+                user=user,
+                tags=row['tags'],
+                date_start=str(row['date_start']),
+                date_end=str(row['date_end'])
+            ))
+
+        return rules
 
     def find_rule_by_user_id(self, id):
         connect = self.connect

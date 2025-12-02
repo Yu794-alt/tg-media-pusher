@@ -1,10 +1,17 @@
+from multiprocessing import Manager
 from typing import cast
 from urllib import request
 
-from flask import Blueprint, render_template, request, session, redirect, current_app as app
+from flask import Blueprint, render_template, request, jsonify, session, redirect, current_app as app
 
+from entities.user_entity import User
 from factories.service_factory import ServiceFactory
+from services.telegram.impl.telegram_connect_user import TelegramConnectUser
+from services.telegram_messager_service import TelegramMessagerService
+from utils.helpers.get_telegram_client import get_telegram_connection, remove_telegram_connection
 
+# tg_connections = Manager().dict()
+tg_connections = {}
 main_bp = Blueprint('main', __name__)
 
 
@@ -40,6 +47,11 @@ def config():
                 raise Exception("No user found")
 
     return render_template("pages/configuration.html")
+
+
+@main_bp.route("/howItworks", methods=["get"])
+def howItworks():
+    return render_template('pages/howItworks.html')
 
 
 @main_bp.route("/signin", methods=["POST"])
@@ -82,10 +94,10 @@ def dashboard():
 
     service_factory = cast(ServiceFactory, app.config['SERVICE_FACTORY'])
 
+    rules = service_factory.create_rule_service().find_all_rules_by_user(User(id=user_id))
     analytic_records = service_factory.create_analytic_record_service().get_analytic_record_by_user_id(user_id)
 
-    # return jsonify({'message': 'successes',  'redirect1': '/'}), 200
-    return render_template('pages/dashboard.html', analytic_records=analytic_records)
+    return render_template('pages/dashboard.html', rules=rules, analytic_records=analytic_records)
 
 
 @main_bp.route("/logout")
@@ -97,3 +109,52 @@ def logout():
 
     # Redirect user to login form
     return redirect("/")
+
+
+@main_bp.route("/newClient", methods=["POST"])
+def new_client():
+    user_id = session["user_id"]
+
+    if request.method == "POST":
+        data = request.get_json()
+        tg_phone = data.get('phone', None)
+        tg_code = data.get('tg_code', None)
+        tg_password = data.get('tg_password', None)
+        ms = cast(TelegramMessagerService, app.config['TELEGRAM_MESSAGER_SERVICE'])
+
+        tg_connect = get_telegram_connection(user_id,
+                                             TelegramConnectUser(phone=tg_phone, session_name=f"client_{user_id}"),
+                                             tg_connections)
+
+        if tg_password:
+            tg_connect.password = tg_password
+
+        if tg_code:
+            tg_connect.auth_code = tg_code
+
+        ms.telegram_connector(tg_connect)
+
+        if tg_connect.is_connected:
+            ms.add_client(tg_connect.client, user_id)
+            remove_telegram_connection(user_id, tg_connections)
+
+            return jsonify({
+                'code': 4,
+                'message': f'Client  was successfully connected'})
+
+        if not tg_code:
+            return jsonify({
+                'code': 2,
+                'error': 'You must provide request code we sent it to your device'})
+
+        if tg_connect.password_hint:
+            return jsonify({
+                'code': 3,
+                'error': f'You have enabled 2FA and you must provide password. Password hint: {tg_connect.password_hint}'})
+
+
+
+    remove_telegram_connection(user_id, tg_connections)
+    return jsonify({
+        'code': 5,
+        'error': f'Something went wrong. Please try again later.'})

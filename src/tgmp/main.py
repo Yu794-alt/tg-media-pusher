@@ -52,8 +52,9 @@ def init_tg_messagers_service():
     tg_connection = TelegramConnectUser(config.PHONE, session_name="name")
     ms = TelegramMessagerService(app)
     ms.start()
+    ms.telegram_connector(tg_connection)
     # Don't add multiple clients with same session file (sqlite3 databases)
-    ms.add_client(tg_connection, '96')
+    ms.add_client(tg_connection.client, '96')
     app.config['TELEGRAM_MESSAGER_SERVICE'] = ms
 
 

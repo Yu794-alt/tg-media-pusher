@@ -20,3 +20,4 @@ class ServiceFactory:
 
     def create_candidate_service(self) -> CandidateService:
         return CandidateService(self.repository_factory.create_candidate_repository())
+

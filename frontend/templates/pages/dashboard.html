@@ -18,7 +18,7 @@
 
 
     <div class="container flex items-center justify-center">
-        <table class="table-auto w-full">
+        <table id="analyticsTable" class="table-auto w-full">
             <thead>
             <tr>
                 <th>id</th>
@@ -31,7 +31,7 @@
             </thead>
             <tbody>
             {% for row in analytic_records %}
-            <tr>
+            <tr id="25">
                 <td>{{row.user_id}}</td>
                 <td>{{row.cv_path}}</td>
                 <td>{{row.rule.id}}</td>
@@ -44,6 +44,70 @@
         </table>
     </div>
 </section>
+
+<script>
+    const socket = io("http://127.0.0.1:5500");
+
+
+    socket.on('connect', () => {
+        console.log('Connected:', socket.connected); // Теперь должно быть true
+
+        // Запрашиваем историю после подключения
+
+    });
+
+    // Слушаем тестовое событие
+    socket.on("new_cv", (data) => {
+        console.log("Received data:", data);
+        if (data.event === 'new_cv') {
+            socket.emit("get_dashboard_row");
+
+        }
+    });
+
+    socket.on("new_analytic_record", (data) => {
+        addRowToTable(data)
+    });
+
+    function addRowToTable(rowData) {
+        const tbody = document.querySelector('#analyticsTable tbody');
+
+        // Создаем новую строку
+        const newRow = document.createElement('tr');
+        newRow.id = rowData.id || Date.now(); // Используем ID из данных или timestamp
+
+        // Заполняем ячейки данными
+        newRow.innerHTML = `
+            <td>${escapeHtml(rowData.user_id || '')}</td>
+            <td>${escapeHtml(rowData.cv_path || '')}</td>
+            <td>${escapeHtml(rowData.rule_id || rowData.rule_id || '')}</td>
+            <td>${escapeHtml(rowData.opinion || '')}</td>
+            <td>${escapeHtml(rowData.ai_result || '')}</td>
+            <td>${escapeHtml(rowData.candidate_tg_id || rowData.candidate_tg_id || '')}</td>
+        `;
+
+        // Добавляем строку в начало таблицы
+        tbody.insertBefore(newRow, tbody.firstChild);
+
+        // Или добавляем в конец (раскомментируйте если нужно):
+        // tbody.appendChild(newRow);
+
+        // Добавляем анимацию для визуального эффекта
+        newRow.style.backgroundColor = '#d4edda'; // Зеленый фон
+        setTimeout(() => {
+            newRow.style.transition = 'background-color 1.5s';
+            newRow.style.backgroundColor = '';
+        }, 100);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+
+</script>
 
 
 {% endblock %}

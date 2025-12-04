@@ -70,3 +70,50 @@ class AnalyticRecordRepository:
             ))
 
         return analytic_records
+
+    def get_last_analytic_record_by_user_id(self, user_id) -> AnalyticRecord | None:
+        connect = self.db_connection
+        cursor = connect.execute(
+            """SELECT ar.id,
+                      ar.user_id,
+                      ar.rule_id,
+                      ar.cv_path,
+                      ar.ai_result,
+                      ar.opinion,
+                      ar.is_viewed,
+                      r.id        as rule_id,
+                      r.tags      as rule_tags,
+                      c.tg_id     as candidate_id,
+                      c.user_name as candidate_user_name,
+                      c.name      as candidate_name,
+                      c.phone     as candidate_phone
+               FROM analytic_records ar
+                        LEFT JOIN rules r ON ar.rule_id = r.id
+                        LEFT JOIN candidates c ON ar.candidate_id = c.tg_id
+               WHERE ar.user_id = ?
+               ORDER BY ar.id DESC """, (user_id,)
+        )
+        row = cursor.fetchone()
+        cursor.close()
+
+        if len(row) == 0:
+            return None
+
+        return AnalyticRecord(
+            user_id=row['user_id'],
+            rule=Rule(
+                id=row['rule_id'],
+                user=User(),
+                tags=row['rule_tags']
+            ),
+            cv_path=row['cv_path'],
+            ai_result=row['ai_result'],
+            opinion=row['opinion'],
+            candidate=Candidate(
+                user_name=row['candidate_user_name'],
+                tg_id=row['candidate_id'],
+                name=row['candidate_name'],
+                phone=row['candidate_phone']
+            ),
+            is_viewed=row['is_viewed']
+        )

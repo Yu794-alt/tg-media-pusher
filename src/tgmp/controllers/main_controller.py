@@ -3,6 +3,9 @@ from typing import cast
 from urllib import request
 
 from flask import Blueprint, render_template, request, jsonify, session, redirect, current_app as app
+from flask_socketio import emit
+
+from utils.helpers.socket_extensions import socketio
 
 from entities.user_entity import User
 from factories.service_factory import ServiceFactory
@@ -152,9 +155,23 @@ def new_client():
                 'code': 3,
                 'error': f'You have enabled 2FA and you must provide password. Password hint: {tg_connect.password_hint}'})
 
-
-
     remove_telegram_connection(user_id, tg_connections)
     return jsonify({
         'code': 5,
         'error': f'Something went wrong. Please try again later.'})
+
+
+@socketio.on("get_dashboard_row")
+def get_dashboard_row():
+    user_id = session["user_id"]
+    service_factory = cast(ServiceFactory, app.config['SERVICE_FACTORY'])
+
+    analytic_records = service_factory.create_analytic_record_service().get_last_analytic_record_by_user_id(user_id)
+
+    socketio.emit("new_analytic_record", {"user_id": analytic_records.user_id,
+                                          "cv_path": analytic_records.cv_path,
+                                          "rule_id": analytic_records.rule.id,
+                                          "opinion": analytic_records.opinion,
+                                          "ai_result": analytic_records.ai_result,
+                                          "candidate_tg_id": analytic_records.candidate.tg_id
+                                          })

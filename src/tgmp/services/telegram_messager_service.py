@@ -16,6 +16,7 @@ from factories.service_factory import ServiceFactory
 from services.cv_processing_service import CVProcessingService
 from services.telegram.telegram_connect import TelegramConnect
 from utils.helpers.db_connection_helper import DBConnection
+from utils.helpers.socket_extensions import socketio
 
 
 class TelegramMessagerService:
@@ -134,7 +135,7 @@ class TelegramMessagerService:
             self.service_factory.create_analytic_record_service().create_analytic_record(
                 AnalyticRecord(client_name, rules, dosc, result, '', candidate)
             )
-
+            socketio.emit("new_cv", {"event": "new_cv"})
             print(f"[{client_name}] New message received: {event.message.text}")
 
         # @client.on(events.NewMessage(outgoing=True))

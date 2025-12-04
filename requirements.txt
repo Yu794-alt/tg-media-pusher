@@ -4,3 +4,4 @@ telethon
 google-genai
 livereload
 Flask-Session
+flask-socketio

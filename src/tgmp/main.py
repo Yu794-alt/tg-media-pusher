@@ -5,6 +5,7 @@ import config
 from controllers.main_controller import main_bp
 from flask import Flask
 from flask_session import Session
+from flask_socketio import SocketIO
 from livereload import Server
 
 from factories.repository_factory import RepositoryFactory
@@ -12,6 +13,7 @@ from factories.service_factory import ServiceFactory
 from services.telegram.impl.telegram_connect_user import TelegramConnectUser
 from services.telegram_messager_service import TelegramMessagerService
 from utils.helpers.db_connection_helper import DBConnection
+from utils.helpers.socket_extensions import socketio
 
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -70,12 +72,12 @@ def main():
     init_db()
     init_factories()
     init_tg_messagers_service()
-    server.serve(port=5500, host="127.0.0.1", debug=False)
-    # app.run(debug=False)
+    socketio.init_app(app)
+    socketio.run(app, port=5500, host="127.0.0.1", debug=False, allow_unsafe_werkzeug=True)
 
 
 if __name__ == "__main__":
-    server = Server(app.wsgi_app)
-    server.watch(TEMPLATES_DIR)
-    server.watch(STATIC_DIR)
+    # server = Server(app.wsgi_app)
+    # server.watch(TEMPLATES_DIR)
+    # server.watch(STATIC_DIR)
     main()

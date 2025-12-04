@@ -15,3 +15,6 @@ class AnalyticRecordService:
 
     def get_analytic_record_by_user_id(self, user_id) -> list[AnalyticRecord]:
         return self.analytic_record_repository.get_analytic_record_by_user_id(user_id)
+
+    def get_last_analytic_record_by_user_id(self, user_id) -> AnalyticRecord | None:
+        return self.analytic_record_repository.get_last_analytic_record_by_user_id(user_id)

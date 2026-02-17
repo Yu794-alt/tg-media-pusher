@@ -6,38 +6,45 @@
 <section class="h-full  flex flex-col bg-background-primary">
 
     <div class="my-10 gap-2 flex container">
-        {% for rules in rules %}
-        <div id="{{rules.id}}" class="card flex items-start cursor-pointer">
+        {% for rule in rules %}
+        <div id="rule-{{rule.id}}" onclick="handleTechPack('{{ rule.id }}')" class="card flex items-start cursor-pointer transition-all hover:shadow-lg">
             <span class="text-[12px] text-primary">Technologies:</span>
-            <div class="font-bold pt-0 text-primary">{{rules.tags}}</div>
-            <span class="text-[12px] text-primary">Date Start: {{rules.date_start}}</span>
-            <span class="text-[12px] text-primary">Date End: {{rules.date_end}}</span>
+            <div class="font-bold pt-0 text-primary">{{rule.tags}}</div>
+            <span class="text-[12px] text-primary">Date Start: {{rule.date_start}}</span>
+            <span class="text-[12px] text-primary">Date End: {{rule.date_end}}</span>
         </div>
         {% endfor %}
     </div>
 
 
-    <div class="container flex items-center justify-center">
-        <table id="analyticsTable" class="table-auto w-full">
-            <thead>
+    <div class="container overflow-x-auto">
+        <table id="analyticsTable" class="table-auto w-full border-collapse border border-tertiary">
+            <thead class="bg-background-secondary">
             <tr>
-                <th>id</th>
-                <th>cv_path</th>
-                <th>Price</th>
-                <th>Transacted</th>
-                <th>Transacted</th>
-                <th>Transacted</th>
+                <th class="border border-tertiary px-4 py-2 text-primary">User ID</th>
+                <th class="border border-tertiary px-4 py-2 text-primary">CV Path</th>
+                <th class="border border-tertiary px-4 py-2 text-primary">Rule ID</th>
+                <th class="border border-tertiary px-4 py-2 text-primary">Opinion</th>
+                {% for tech in tech_columns %}
+                <th class="border border-tertiary px-4 py-2 text-secondary font-bold">{{ tech }}</th>
+                {% endfor %}
+                <th class="border border-tertiary px-4 py-2 text-primary">Candidate ID</th>
             </tr>
             </thead>
             <tbody>
             {% for row in analytic_records %}
-            <tr id="25">
-                <td>{{row.user_id}}</td>
-                <td>{{row.cv_path}}</td>
-                <td>{{row.rule.id}}</td>
-                <td>{{row.opinion}}</td>
-                <td>{{row.ai_result}}</td>
-                <td>{{row.candidate.tg_id}}</td>
+            <tr class="hover:bg-secondary/10 transition-colors">
+                <td class="border border-tertiary px-4 py-2">{{row.user_id}}</td>
+                <td class="border border-tertiary px-4 py-2 truncate max-w-xs" title="{{row.cv_path}}">{{row.cv_path}}
+                </td>
+                <td class="border border-tertiary px-4 py-2">{{row.rule.id}}</td>
+                <td class="border border-tertiary px-4 py-2">{{row.opinion}}</td>
+                {% for tech in tech_columns %}
+                <td class="border border-tertiary px-4 py-2 text-center font-semibold">
+                    {{ row.ai_result_parsed.get(tech, '-') }}
+                </td>
+                {% endfor %}
+                <td class="border border-tertiary px-4 py-2">{{row.candidate.tg_id}}</td>
             </tr>
             {% endfor %}
             </tbody>
@@ -48,20 +55,14 @@
 <script>
     const socket = io("http://127.0.0.1:5500");
 
-
     socket.on('connect', () => {
-        console.log('Connected:', socket.connected); // Теперь должно быть true
-
-        // Запрашиваем историю после подключения
-
+        console.log('Connected:', socket.connected);
     });
 
-    // Слушаем тестовое событие
     socket.on("new_cv", (data) => {
         console.log("Received data:", data);
         if (data.event === 'new_cv') {
             socket.emit("get_dashboard_row");
-
         }
     });
 
@@ -69,31 +70,50 @@
         addRowToTable(data)
     });
 
+    // Load first rule on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        const firstRule = document.querySelector('[id^="rule-"]');
+        if (firstRule) {
+            const ruleId = firstRule.id.replace('rule-', '');
+            handleTechPack(ruleId);
+        }
+    });
+
     function addRowToTable(rowData) {
         const tbody = document.querySelector('#analyticsTable tbody');
+        const thead = document.querySelector('#analyticsTable thead tr');
+        const aiResult = rowData.ai_result || {};
 
-        // Создаем новую строку
+        // Get tech columns from table headers
+        const headers = thead.querySelectorAll('th');
+        const techColumns = [];
+        for (let i = 4; i < headers.length - 1; i++) {
+            techColumns.push(headers[i].textContent.trim());
+        }
+
+        // Build row HTML
+        let rowHTML = `
+            <td class="border border-tertiary px-4 py-2">${escapeHtml(rowData.user_id || '')}</td>
+            <td class="border border-tertiary px-4 py-2 truncate max-w-xs" title="${escapeHtml(rowData.cv_path || '')}">${escapeHtml(rowData.cv_path || '')}</td>
+            <td class="border border-tertiary px-4 py-2">${escapeHtml(rowData.rule_id || '')}</td>
+            <td class="border border-tertiary px-4 py-2">${escapeHtml(rowData.opinion || '')}</td>`;
+
+        // Add tech values
+        techColumns.forEach(tech => {
+            const value = aiResult[tech] || '-';
+            rowHTML += `<td class="border border-tertiary px-4 py-2 text-center font-semibold">${escapeHtml(value)}</td>`;
+        });
+
+        rowHTML += `<td class="border border-tertiary px-4 py-2">${escapeHtml(rowData.candidate_tg_id || '')}</td>`;
+
         const newRow = document.createElement('tr');
-        newRow.id = rowData.id || Date.now(); // Используем ID из данных или timestamp
+        newRow.className = 'hover:bg-secondary/10 transition-colors';
+        newRow.innerHTML = rowHTML;
 
-        // Заполняем ячейки данными
-        newRow.innerHTML = `
-            <td>${escapeHtml(rowData.user_id || '')}</td>
-            <td>${escapeHtml(rowData.cv_path || '')}</td>
-            <td>${escapeHtml(rowData.rule_id || rowData.rule_id || '')}</td>
-            <td>${escapeHtml(rowData.opinion || '')}</td>
-            <td>${escapeHtml(rowData.ai_result || '')}</td>
-            <td>${escapeHtml(rowData.candidate_tg_id || rowData.candidate_tg_id || '')}</td>
-        `;
-
-        // Добавляем строку в начало таблицы
         tbody.insertBefore(newRow, tbody.firstChild);
 
-        // Или добавляем в конец (раскомментируйте если нужно):
-        // tbody.appendChild(newRow);
-
-        // Добавляем анимацию для визуального эффекта
-        newRow.style.backgroundColor = '#d4edda'; // Зеленый фон
+        // Animation
+        newRow.style.backgroundColor = '#d4edda';
         setTimeout(() => {
             newRow.style.transition = 'background-color 1.5s';
             newRow.style.backgroundColor = '';
@@ -104,6 +124,85 @@
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    function handleTechPack(id) {
+        // Remove active class from all cards
+        document.querySelectorAll('[id^="rule-"]').forEach(card => {
+            card.classList.remove('ring-2', 'ring-secondary', 'shadow-lg');
+        });
+
+        // Add active class to selected card
+        const selectedCard = document.getElementById(`rule-${id}`);
+        if (selectedCard) {
+            selectedCard.classList.add('ring-2', 'ring-secondary', 'shadow-lg');
+        }
+
+        fetch('/technologies', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(id)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                rebuildTable(data.records, data.tech_columns);
+            } else {
+                console.error('Error:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
+    }
+
+    function rebuildTable(records, techColumns) {
+        const table = document.getElementById('analyticsTable');
+        const thead = table.querySelector('thead tr');
+        const tbody = table.querySelector('tbody');
+
+        // Rebuild table header
+        thead.innerHTML = `
+            <th class="border border-tertiary px-4 py-2 text-primary">User ID</th>
+            <th class="border border-tertiary px-4 py-2 text-primary">CV Path</th>
+            <th class="border border-tertiary px-4 py-2 text-primary">Rule ID</th>
+            <th class="border border-tertiary px-4 py-2 text-primary">Opinion</th>
+            ${techColumns.map(tech =>
+                `<th class="border border-tertiary px-4 py-2 text-secondary font-bold">${escapeHtml(tech)}</th>`
+            ).join('')}
+            <th class="border border-tertiary px-4 py-2 text-primary">Candidate ID</th>
+        `;
+
+        // Rebuild table body
+        if (records.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="${4 + techColumns.length + 1}" class="border border-tertiary px-4 py-8 text-center text-primary">
+                        No records found for this rule
+                    </td>
+                </tr>
+            `;
+        } else {
+            tbody.innerHTML = records.map(row => {
+                const techCells = techColumns.map(tech => {
+                    const value = row.ai_result[tech] || '-';
+                    return `<td class="border border-tertiary px-4 py-2 text-center font-semibold">${escapeHtml(value)}</td>`;
+                }).join('');
+
+                return `
+                    <tr class="hover:bg-secondary/10 transition-colors">
+                        <td class="border border-tertiary px-4 py-2">${escapeHtml(row.user_id || '')}</td>
+                        <td class="border border-tertiary px-4 py-2 truncate max-w-xs" title="${escapeHtml(row.cv_path || '')}">${escapeHtml(row.cv_path || '')}</td>
+                        <td class="border border-tertiary px-4 py-2">${escapeHtml(row.rule_id || '')}</td>
+                        <td class="border border-tertiary px-4 py-2">${escapeHtml(row.opinion || '')}</td>
+                        ${techCells}
+                        <td class="border border-tertiary px-4 py-2">${escapeHtml(row.candidate_tg_id || '')}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
     }
 
 

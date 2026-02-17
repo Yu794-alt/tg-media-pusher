@@ -1,10 +1,12 @@
 from multiprocessing import Manager
 from typing import cast
 from urllib import request
+import json
 
 from flask import Blueprint, render_template, request, jsonify, session, redirect, current_app as app
 from flask_socketio import emit
 
+from entities.rule_entity import Rule
 from utils.helpers.socket_extensions import socketio
 
 from entities.user_entity import User
@@ -40,12 +42,9 @@ def config():
 
         if data:
             tags = data.get('tags', [])
-            print(session['user_id'])
             if session['user_id']:
-                # user_service = ServiceFactory().create_user_service(session['user_id'])
-                service_factory.create_user_service().find_user_by_id(session['user_id'])
-                # ms = cast(TelegramMessagerService,app.config["TELEGRAM_MESSAGER_SERVICE"])
-                # client = ms.get_client(str(session['user_id']))
+                user  = service_factory.create_user_service().find_user_by_id(session['user_id'])
+                service_factory.create_rule_service().create_rule(Rule(user, tags=tags))
             else:
                 raise Exception("No user found")
 
@@ -98,9 +97,82 @@ def dashboard():
     service_factory = cast(ServiceFactory, app.config['SERVICE_FACTORY'])
 
     rules = service_factory.create_rule_service().find_all_rules_by_user(User(id=user_id))
-    analytic_records = service_factory.create_analytic_record_service().get_analytic_record_by_user_id(user_id)
+    last_rule = service_factory.create_rule_service().find_last_rule_by_user_id(user_id)
+    analytic_records = service_factory.create_analytic_record_service().get_analytic_records_by_rule_id(user_id=user_id, rule_id=last_rule.id)
 
-    return render_template('pages/dashboard.html', rules=rules, analytic_records=analytic_records)
+    # Parse ai_result and collect all unique technology columns
+    tech_columns = []
+    for record in analytic_records:
+        try:
+            ai_data = json.loads(record.ai_result) if isinstance(record.ai_result, str) else record.ai_result
+            record.ai_result_parsed = ai_data
+            # Collect all unique tech keys (preserve order of first appearance)
+            for tech in ai_data.keys():
+                if tech not in tech_columns:
+                    tech_columns.append(tech)
+        except (json.JSONDecodeError, AttributeError, TypeError):
+            record.ai_result_parsed = {}
+
+    return render_template('pages/dashboard.html', rules=rules, analytic_records=analytic_records,
+                           tech_columns=tech_columns)
+
+
+@main_bp.route("/technologies", methods=["POST"])
+def technologies():
+    service_factory = cast(ServiceFactory, app.config['SERVICE_FACTORY'])
+    user_id = session["user_id"]
+
+    data = request.get_json()
+    rule_id = data if isinstance(data, (int, str)) else data.get('rule_id')
+
+    if not rule_id:
+        return jsonify({
+            'success': False,
+            'message': 'Rule ID is required'
+        }), 400
+
+    # Get filtered analytic records
+    analytic_records = service_factory.create_analytic_record_service().get_analytic_records_by_rule_id(
+        rule_id, user_id
+    )
+
+    # Parse ai_result and collect tech columns
+    tech_columns = []
+    records_data = []
+
+    for record in analytic_records:
+        try:
+            ai_data = json.loads(record.ai_result) if isinstance(record.ai_result, str) else record.ai_result
+
+            # Collect unique tech columns
+            for tech in ai_data.keys():
+                if tech not in tech_columns:
+                    tech_columns.append(tech)
+
+            # Prepare record data
+            records_data.append({
+                'user_id': record.user_id,
+                'cv_path': record.cv_path,
+                'rule_id': record.rule.id,
+                'opinion': record.opinion,
+                'ai_result': ai_data,
+                'candidate_tg_id': record.candidate.tg_id if record.candidate else None
+            })
+        except (json.JSONDecodeError, AttributeError, TypeError):
+            records_data.append({
+                'user_id': record.user_id,
+                'cv_path': record.cv_path,
+                'rule_id': record.rule.id,
+                'opinion': record.opinion,
+                'ai_result': {},
+                'candidate_tg_id': record.candidate.tg_id if record.candidate else None
+            })
+
+    return jsonify({
+        'success': True,
+        'records': records_data,
+        'tech_columns': tech_columns
+    })
 
 
 @main_bp.route("/logout")
@@ -164,14 +236,22 @@ def new_client():
 @socketio.on("get_dashboard_row")
 def get_dashboard_row():
     user_id = session["user_id"]
+
     service_factory = cast(ServiceFactory, app.config['SERVICE_FACTORY'])
 
     analytic_records = service_factory.create_analytic_record_service().get_last_analytic_record_by_user_id(user_id)
+
+    # Parse ai_result JSON
+    try:
+        ai_result_parsed = json.loads(analytic_records.ai_result) if isinstance(analytic_records.ai_result,
+                                                                                str) else analytic_records.ai_result
+    except (json.JSONDecodeError, AttributeError, TypeError):
+        ai_result_parsed = {}
 
     socketio.emit("new_analytic_record", {"user_id": analytic_records.user_id,
                                           "cv_path": analytic_records.cv_path,
                                           "rule_id": analytic_records.rule.id,
                                           "opinion": analytic_records.opinion,
-                                          "ai_result": analytic_records.ai_result,
+                                          "ai_result": ai_result_parsed,
                                           "candidate_tg_id": analytic_records.candidate.tg_id
                                           })

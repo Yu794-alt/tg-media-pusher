@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS rules
     tags       TEXT NOT NULL,
     date_start DATETIME,
     date_end   DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
 

@@ -116,7 +116,7 @@ class TelegramMessagerService:
     def _register_handlers(self, client, client_name):
         """Register handlers for client"""
 
-        @client.on(events.NewMessage(incoming=True, from_users='Arkadiy',
+        @client.on(events.NewMessage(incoming=True, from_users='is_not_a_funcrion',
                                      func=lambda e: e.media and hasattr(e.media, 'document')))
         async def handle_new_message(event):
             cv = event.message.document
@@ -125,7 +125,7 @@ class TelegramMessagerService:
 
             rule_repository = self.repository_factory.create_rule_repository()
 
-            rules = rule_repository.find_rule_by_user_id(client_name)
+            rules = rule_repository.find_last_rule_by_user_id(client_name)
 
             result = CVProcessingService.get_ai_result(rules.tags, file_gemini_reference_to_file)
 
@@ -158,7 +158,7 @@ class TelegramMessagerService:
         # @client.on(events.NewMessage)
         # async def new_message_handler(event):
         #     print(f"[{client_name}] New message received: {event.message.text}")
-        #
+
         # @client.on(events.MessageEdited)
         # async def edit_message_handler(event):
         #     print(f"[{client_name}] Message edited: {event.message.text}")

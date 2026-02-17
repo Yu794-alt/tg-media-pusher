@@ -11,10 +11,12 @@ class RuleRepository:
     def create_rule(self, rule: Rule):
         connect = self.connect
 
-        result = connect.execute("INSERT INTO rules (tags, user_id) VALUES(?, ?)",
-                                 (rule.tags, rule.user.id)).fetchone()
+        cursor = connect.execute(
+            "INSERT INTO rules (tags, user_id) VALUES(?, ?)",
+            (rule.tags, rule.user.id)
+        )
         connect.commit()
-        new_rule_id = result.lastrowid
+        new_rule_id = cursor.lastrowid
         return new_rule_id
 
     def find_rule_by_user(self, user: User):
@@ -32,7 +34,8 @@ class RuleRepository:
 
         cursor = connect.execute("""SELECT id, tags, date_start, date_end
                                     FROM rules
-                                    WHERE user_id = ? """,
+                                    WHERE user_id = ?
+                                    ORDER BY created_at DESC""",
                                  (user.id,))
         rows = cursor.fetchall()
         cursor.close()
@@ -58,6 +61,29 @@ class RuleRepository:
 
         cursor = connect.execute("SELECT id, tags FROM rules WHERE user_id = ? ",
                                  (id,))
+        row = cursor.fetchone()
+        cursor.close()
+
+        if row is None:
+            return None
+
+        return Rule(
+            id=row['id'],
+            user=User(
+                id=96,
+                login='qweqweqwe'
+            ),
+            tags=row['tags'],
+        )
+
+    def find_last_rule_by_user_id(self, id):
+        """Возвращает последний (по id) rule для заданного user_id."""
+        connect = self.connect
+
+        cursor = connect.execute(
+            "SELECT id, tags FROM rules WHERE user_id = ? ORDER BY id DESC LIMIT 1",
+            (id,)
+        )
         row = cursor.fetchone()
         cursor.close()
 

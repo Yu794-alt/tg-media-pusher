@@ -54,3 +54,4 @@ test-results.xml
 *.session
 local_settings.py
 /flask_session/
+/prompts/

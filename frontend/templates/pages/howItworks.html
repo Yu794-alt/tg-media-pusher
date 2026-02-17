@@ -1,12 +1,163 @@
 {% extends "index.html" %}
 
-{% block title %}Home - My Flask App{% endblock %}
+{% block title %}How It Works - TeleAnalyst{% endblock %}
 
 {% block content %}
-<section class="h-full  flex flex-col bg-background-primary">
+<section class="bg-background-primary py-12">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-primary mb-4">How It Works</h1>
+            <p class="text-primary text-lg max-w-3xl mx-auto">
+                AI-powered recruitment automation from CV submission to analytics dashboard
+            </p>
+        </div>
+    </div>
+</section>
 
-    <h1>HOW it works</h1>
+<section class="bg-white py-12">
+    <div class="container">
+        <h2 class="text-3xl font-bold text-primary mb-8 text-center">Simple Workflow</h2>
 
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div class="bg-background-secondary p-6 rounded flex flex-col items-center text-center">
+                <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">1</div>
+                <img class="w-12 h-12 mb-4" src="../../static/images/1.png" alt="Telegram"/>
+                <h3 class="font-bold text-primary mb-2">Telegram Integration</h3>
+                <p class="text-xs text-tertiary">
+                    Candidates send CV via Telegram bot
+                </p>
+            </div>
+
+            <div class="bg-background-secondary p-6 rounded flex flex-col items-center text-center">
+                <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">2</div>
+                <img class="w-12 h-12 mb-4" src="../../static/images/2.png" alt="AI"/>
+                <h3 class="font-bold text-primary mb-2">AI Analysis</h3>
+                <p class="text-xs text-tertiary">
+                    Gemini AI analyzes skills and experience
+                </p>
+            </div>
+
+            <div class="bg-background-secondary p-6 rounded flex flex-col items-center text-center">
+                <div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center text-white text-2xl font-bold mb-4">3</div>
+                <img class="w-12 h-12 mb-4" src="../../static/images/3.png" alt="Dashboard"/>
+                <h3 class="font-bold text-primary mb-2">Real-Time Dashboard</h3>
+                <p class="text-xs text-tertiary">
+                    View analytics and candidate scores instantly
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-background-primary py-12">
+    <div class="container">
+        <h2 class="text-3xl font-bold text-primary mb-8 text-center">Technical Architecture</h2>
+
+        <div class="max-w-2xl mx-auto bg-white p-8 rounded">
+            <div class="flex flex-col gap-6">
+                <div class="flex items-center gap-4">
+                    <div class="bg-secondary text-white px-4 py-3 rounded text-center flex-1 font-semibold text-sm">
+                        Telegram API<br/>
+                        <span class="text-xs font-normal">(Telethon)</span>
+                    </div>
+                    <div class="text-secondary text-2xl">→</div>
+                    <div class="bg-primary text-white px-4 py-3 rounded text-center flex-1 font-semibold text-sm">
+                        Flask Backend<br/>
+                        <span class="text-xs font-normal">(Python)</span>
+                    </div>
+                </div>
+
+                <div class="text-center text-2xl text-secondary">↓</div>
+
+                <div class="flex items-center gap-4">
+                    <div class="bg-primary text-white px-4 py-3 rounded text-center flex-1 font-semibold text-sm">
+                        CV Processing<br/>
+                        <span class="text-xs font-normal">(Upload)</span>
+                    </div>
+                    <div class="text-secondary text-2xl">→</div>
+                    <div class="bg-secondary text-white px-4 py-3 rounded text-center flex-1 font-semibold text-sm">
+                        Gemini AI<br/>
+                        <span class="text-xs font-normal">(Analysis)</span>
+                    </div>
+                </div>
+
+                <div class="text-center text-2xl text-secondary">↓</div>
+
+                <div class="flex items-center gap-4">
+                    <div class="bg-primary text-white px-4 py-3 rounded text-center flex-1 font-semibold text-sm">
+                        SQLite DB<br/>
+                        <span class="text-xs font-normal">(Storage)</span>
+                    </div>
+                    <div class="text-secondary text-2xl">→</div>
+                    <div class="bg-secondary text-white px-4 py-3 rounded text-center flex-1 font-semibold text-sm">
+                        SocketIO<br/>
+                        <span class="text-xs font-normal">(Live Updates)</span>
+                    </div>
+                </div>
+
+                <div class="text-center text-2xl text-secondary">↓</div>
+
+                <div class="bg-primary text-white px-4 py-3 rounded text-center font-semibold text-sm">
+                    Dashboard UI<br/>
+                    <span class="text-xs font-normal">(Real-time Analytics)</span>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-tertiary">
+                <h4 class="font-bold text-primary mb-3">Technology Stack:</h4>
+                <div class="text-sm text-tertiary space-y-2">
+                    <div><span class="font-semibold text-secondary">Backend:</span> Python Flask, Telethon, SocketIO</div>
+                    <div><span class="font-semibold text-secondary">Database:</span> SQLite3</div>
+                    <div><span class="font-semibold text-secondary">AI:</span> Google Gemini API</div>
+                    <div><span class="font-semibold text-secondary">Frontend:</span> Tailwind CSS, JavaScript</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-white py-12">
+    <div class="container">
+        <h2 class="text-3xl font-bold text-primary mb-8 text-center">Key Benefits</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
+            <div class="bg-background-secondary p-6 rounded text-center">
+                <img class="w-12 h-12 mx-auto mb-3" src="../../static/images/1.png" alt="Automation"/>
+                <h4 class="font-bold text-primary mb-2 text-lg">Automated</h4>
+                <p class="text-xs text-tertiary">End-to-end CV processing</p>
+            </div>
+
+            <div class="bg-background-secondary p-6 rounded text-center">
+                <img class="w-12 h-12 mx-auto mb-3" src="../../static/images/2.png" alt="Real-time"/>
+                <h4 class="font-bold text-primary mb-2 text-lg">Real-Time</h4>
+                <p class="text-xs text-tertiary">Instant analysis & updates</p>
+            </div>
+
+            <div class="bg-background-secondary p-6 rounded text-center">
+                <img class="w-12 h-12 mx-auto mb-3" src="../../static/images/3.png" alt="Scalable"/>
+                <h4 class="font-bold text-primary mb-2 text-lg">Scalable</h4>
+                <p class="text-xs text-tertiary">Handle high volume easily</p>
+            </div>
+
+            <div class="bg-background-secondary p-6 rounded text-center">
+                <img class="w-12 h-12 mx-auto mb-3" src="../../static/images/4.png" alt="Analytics"/>
+                <h4 class="font-bold text-primary mb-2 text-lg">Data-Driven</h4>
+                <p class="text-xs text-tertiary">Comprehensive insights</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="bg-background-primary py-16">
+    <div class="container text-center">
+        <h2 class="text-3xl font-bold text-primary mb-4">Ready to Get Started?</h2>
+        <p class="text-primary mb-6">
+            Set up your Telegram bot and automate CV screening in minutes
+        </p>
+        <button onclick="window.location.href='/config'" class="btn-primary text-lg px-8 py-3">
+            Configure Your Bot Now
+        </button>
+    </div>
 </section>
 
 

@@ -18,3 +18,7 @@ class AnalyticRecordService:
 
     def get_last_analytic_record_by_user_id(self, user_id) -> AnalyticRecord | None:
         return self.analytic_record_repository.get_last_analytic_record_by_user_id(user_id)
+
+    def get_analytic_records_by_rule_id(self, rule_id, user_id) -> list[AnalyticRecord]:
+        return self.analytic_record_repository.get_analytic_records_by_rule_id(rule_id, user_id)
+
